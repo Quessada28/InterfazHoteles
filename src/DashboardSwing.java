@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.Locale;
 
 //Investigar como canviarle el lookAndFeel
@@ -886,5 +887,81 @@ public class DashboardSwing extends JFrame {
     }
     // Parte de Luis
 
+    public class Modelos {
+        public static class Huesped {
 
+            public String identificacion;
+            public String nombre;
+            public String apellidos;
+            public String telefono;
+            public String correo;
+            public String nacionalidad;
+            public String observaciones;
+
+            public String getNombreCompleto() {
+                return nombre + " " + apellidos;
+            }
+
+            @Override
+            public String toString() {
+                return identificacion + "-" + getNombreCompleto();
+            }
+        }
+
+
+        public static class Habitacion {
+
+            public String numero;
+            public String tipo;
+            public double precioPorNoche;
+            public int capacidad;
+            public String estado;
+
+            @Override
+            public String toString() {
+                return numero + "-" + tipo + "(" + precioPorNoche + " / noche)";
+            }
+        }
+
+        public static class Reservacion {
+            public int id;
+            public Modelos.Huesped huesped;
+            public Habitacion habitacion;
+            public Date fechaEntrada;
+            public Date fechaSalida;
+            public int adultos;
+            public int ninos;
+            public int cantidadHabitaciones;
+            public String estado;
+            public boolean desayuno;
+            public boolean parqueo;
+            public boolean spa;
+            public double total;
+
+            public int getTotalHuespedes() {
+                return adultos + ninos;
+            }
+        }
+    }
+
+
+//Paneles para la interfaz.
+
+    public class PanelHuespedes extends JFrame{
+
+        public PanelHuespedes(){
+
+            setTitle("Modulo de Huesped");
+            setSize(1100, 620);
+            setLocationRelativeTo(null);
+            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        }
+
+        private JPanel crearPanelRedondeado() {
+            JPanel panel = new JPanel();
+            panel.setBackground(Color.WHITE);
+            panel.setBorder(new LineBorder(new Color(218,223,230), 1, true));
+            return panel;
+        }
+    }
 }
