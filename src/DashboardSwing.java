@@ -12,6 +12,10 @@ import java.util.Locale;
 
 //Investigar como canviarle el lookAndFeel
 
+// Parte de Kevin
+
+
+
 public class DashboardSwing extends JFrame {
 
     //Paleta de colores
@@ -21,6 +25,8 @@ private final Color COLOR_MENU = new Color(255, 255, 255);
 // Cuadros de texto
     private JTextField txtNombre;
 
+
+    // Parte de Luis
 
 
 }
