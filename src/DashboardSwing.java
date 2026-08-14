@@ -61,17 +61,17 @@ public class DashboardSwing extends JFrame {
             {"HABITACIONES", "▤", "Habitaciones",
                     "Habitaciones", "Registro y control de las habitaciones del hotel"},
 
-            {"HUESPEDES", "☺", "Huéspedes",
-                    "Huéspedes", "Administración de los huéspedes registrados"},
+            {"HUESPEDES", "☺", "Huespedes",
+                    "Huespedes", "Administracion de los huespedes registrados"},
 
             {"RESERVACIONES", "★", "Reservaciones",
                     "Reservaciones", "Control de entradas, salidas y estado de las reservas"},
 
             {"REPORTES", "▥", "Reportes",
-                    "Reportes", "Consultas y resúmenes de la operación del hotel"},
+                    "Reportes", "Consultas y resumenes de la operacion del hotel"},
 
             {"ACERCA", "◆", "Acerca de",
-                    "Acerca de", "Información del sistema y de sus desarrolladores"}
+                    "Acerca de", "Informacion del sistema y de sus desarrolladores"}
     };
 
     private final CardLayout gestorTarjetas = new CardLayout();
@@ -84,8 +84,6 @@ public class DashboardSwing extends JFrame {
     private PanelPortada portada;
 
     private PanelHabitaciones panelHabitaciones;
-    private PanelHuespedes panelHuespedes;
-    private PanelReservaciones panelReservaciones;
     private PanelReportes panelReportes;
 
     private JLabel lblIndicadorDisponibles;
@@ -103,7 +101,7 @@ public class DashboardSwing extends JFrame {
 
         configurarLookAndFeel();
 
-        setTitle("Tabacon Hotel - Sistema de Gestión Hotelera");
+        setTitle("Tabacon Hotel - Sistema de Gestion Hotelera");
         setSize(1500, 930);
         setMinimumSize(new Dimension(1250, 760));
         setLocationRelativeTo(null);
@@ -162,7 +160,7 @@ public class DashboardSwing extends JFrame {
         izquierda.add(crearDatoContacto("✉", "TabaconHotel@gmail.com"));
         izquierda.add(crearDatoContacto("⌖", "La Fortuna, San Jose, Costa Rica"));
 
-        JLabel lblSesion = new JLabel(textoConIcono("☺", "Recepción  ·  Administrador"));
+        JLabel lblSesion = new JLabel(textoConIcono("☺", "Recepcion  ·  Administrador"));
         lblSesion.setFont(FUENTE_MINI);
         lblSesion.setForeground(COLOR_TEXTO_CLARO);
 
@@ -238,12 +236,21 @@ public class DashboardSwing extends JFrame {
 
         contenedorPaneles.add(panelHabitaciones, "HABITACIONES");
 
-        panelHuespedes = new PanelHuespedes();
-        panelReservaciones = new PanelReservaciones();
         panelReportes = new PanelReportes();
 
-        contenedorPaneles.add(panelHuespedes, "HUESPEDES");
-        contenedorPaneles.add(panelReservaciones, "RESERVACIONES");
+        contenedorPaneles.add(crearPanelPendiente(
+                "Modulo de Huespedes",
+                "En esta seccion se colocara el formulario de registro de huespedes junto con "
+                        + "su tabla, sus validaciones y sus operaciones CRUD.",
+                ""), "HUESPEDES");
+
+        contenedorPaneles.add(crearPanelPendiente(
+                "Modulo de Reservaciones",
+                "En esta seccion se colocara el registro de reservaciones con numero y tipo de "
+                        + "habitacion, fechas de entrada y salida, estado de la reserva y su tabla "
+                        + "con busqueda.",
+                ""), "RESERVACIONES");
+
         contenedorPaneles.add(panelReportes, "REPORTES");
 
         contenedorPaneles.add(crearPanelAcercaDe(), "ACERCA");
@@ -357,7 +364,7 @@ public class DashboardSwing extends JFrame {
     private JButton crearBotonCerrarSesion() {
 
         BotonRedondeado boton = new BotonRedondeado(
-                textoConIcono("⇥", "CERRAR SESIÓN"), 22, COLOR_BRONCE);
+                textoConIcono("⇥", "CERRAR SESION"), 22, COLOR_BRONCE);
 
         boton.setFont(FUENTE_MENU);
         boton.setForeground(COLOR_CAFE);
@@ -440,7 +447,7 @@ public class DashboardSwing extends JFrame {
         tarjetas.add(crearTarjetaIndicador("⌂", "HABITACIONES DISPONIBLES",
                 lblIndicadorDisponibles, "Listas para reservar"));
         tarjetas.add(crearTarjetaIndicador("▤", "HABITACIONES OCUPADAS",
-                lblIndicadorOcupadas, "Con huéspedes dentro"));
+                lblIndicadorOcupadas, "Con huespedes dentro"));
         tarjetas.add(crearTarjetaIndicador("★", "RESERVACIONES ACTIVAS",
                 lblIndicadorReservaciones, "En curso este mes"));
         tarjetas.add(crearTarjetaIndicador("♨", "INGRESOS DEL MES",
@@ -506,7 +513,7 @@ public class DashboardSwing extends JFrame {
         etiqueta.setForeground(COLOR_BRONCE);
         etiqueta.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel titulo = new JLabel("Bienestar y comodidad para cada huésped");
+        JLabel titulo = new JLabel("Bienestar y comodidad para cada huesped");
         titulo.setFont(FUENTE_TITULO_TARJETA);
         titulo.setForeground(COLOR_CAFE);
         titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -529,8 +536,8 @@ public class DashboardSwing extends JFrame {
         lista.add(crearServicio("❄", "Aire acondicionado"));
         lista.add(crearServicio("▭", "TV pantalla plana"));
         lista.add(crearServicio("≈", "Wi-Fi de alta velocidad"));
-        lista.add(crearServicio("⚿", "Caja fuerte electrónica"));
-        lista.add(crearServicio("☕", "Servicio a la habitación"));
+        lista.add(crearServicio("⚿", "Caja fuerte electronica"));
+        lista.add(crearServicio("☕", "Servicio a la habitacion"));
         lista.add(crearServicio("♨", "Aguas termales y spa"));
 
         tarjeta.add(encabezado, BorderLayout.NORTH);
@@ -578,7 +585,7 @@ public class DashboardSwing extends JFrame {
         encabezado.setOpaque(false);
         encabezado.setLayout(new BoxLayout(encabezado, BoxLayout.Y_AXIS));
 
-        JLabel titulo = new JLabel("Sistema de Gestión Hotelera Tabacon");
+        JLabel titulo = new JLabel("Sistema de Gestion Hotelera Tabacon");
         titulo.setFont(FUENTE_TITULO_TARJETA);
         titulo.setForeground(COLOR_CAFE);
         titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -600,12 +607,12 @@ public class DashboardSwing extends JFrame {
         gbc.insets = new Insets(8, 0, 8, 26);
         gbc.anchor = GridBagConstraints.WEST;
 
-        agregarDato(datos, gbc, 0, "Versión:", "1.0.0");
-        agregarDato(datos, gbc, 1, "Curso:", "Programación con Java - Interfaces gráficas");
-        agregarDato(datos, gbc, 2, "Desarrollado por:", "Kevin y Luis");
-        agregarDato(datos, gbc, 3, "Tecnología:", "Java Swing");
+        agregarDato(datos, gbc, 0, "Version:", "1.0.0");
+        agregarDato(datos, gbc, 1, "Curso:", "Programacion III");
+        agregarDato(datos, gbc, 2, "Desarrollado por:", "Kevin y Luis ");
+        agregarDato(datos, gbc, 3, "Tecnologia:", "Java Swing");
         agregarDato(datos, gbc, 4, "Sistema operativo:", System.getProperty("os.name"));
-        agregarDato(datos, gbc, 5, "Versión de Java:", System.getProperty("java.version"));
+        agregarDato(datos, gbc, 5, "Version de Java:", System.getProperty("java.version"));
 
         JPanel envoltura = new JPanel(new BorderLayout());
         envoltura.setOpaque(false);
@@ -709,10 +716,6 @@ public class DashboardSwing extends JFrame {
             actualizarTarjetas();
         }
 
-        if (clave.equals("RESERVACIONES")) {
-            panelReservaciones.actualizarListas();
-        }
-
         if (clave.equals("REPORTES")) {
             panelReportes.actualizarReporte();
         }
@@ -728,7 +731,7 @@ public class DashboardSwing extends JFrame {
                         : "<html>Inicio&nbsp;&nbsp;<span style='color:#BD955A'>|</span>&nbsp;&nbsp;"
                         + SECCIONES[i][2] + "</html>");
                 lblSubtitulo.setText(SECCIONES[i][4]);
-                lblEstado.setText("●  Sección activa: " + SECCIONES[i][2]);
+                lblEstado.setText("●  Seccion activa: " + SECCIONES[i][2]);
             }
 
             botonesMenu[i].setText(textoConIcono(
@@ -778,16 +781,16 @@ public class DashboardSwing extends JFrame {
 
         int opcion = JOptionPane.showConfirmDialog(
                 this,
-                "¿Desea cerrar la sesión y salir del sistema?",
-                "Cerrar sesión",
+                "¿Desea cerrar la sesion y salir del sistema?",
+                "Cerrar sesion",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
 
         if (opcion == JOptionPane.YES_OPTION) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Sesión finalizada. ¡Hasta pronto!",
-                    "Cerrar sesión",
+                    "Sesion finalizada. ¡Hasta pronto!",
+                    "Cerrar sesion",
                     JOptionPane.INFORMATION_MESSAGE);
             dispose();
             System.exit(0);
@@ -798,7 +801,7 @@ public class DashboardSwing extends JFrame {
 
         int opcion = JOptionPane.showConfirmDialog(
                 this,
-                "¿Desea salir del sistema de gestión hotelera?",
+                "¿Desea salir del sistema de gestion hotelera?",
                 "Confirmar salida",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.WARNING_MESSAGE);
@@ -2443,1229 +2446,6 @@ public class DashboardSwing extends JFrame {
             }
 
             return ingresos;
-        }
-    }
-
-    private static class PanelHuespedes extends JPanel {
-
-        private static final String[] COLUMNAS = {
-                "Identificacion", "Nombre completo", "Telefono", "Correo", "Nacionalidad"
-        };
-
-        private static final String[] NACIONALIDADES = {
-                "Costa Rica", "Nicaragua", "Panama", "Honduras", "Guatemala",
-                "Mexico", "Estados Unidos", "Canada", "Espana", "Otra"
-        };
-
-        private static final String PATRON_CORREO = "^[\\w.+-]+@[\\w-]+\\.[A-Za-z]{2,}$";
-
-        private final JTextField txtIdentificacion = EstiloHotel.crearCampoTexto();
-        private final JTextField txtNombre = EstiloHotel.crearCampoTexto();
-        private final JTextField txtApellidos = EstiloHotel.crearCampoTexto();
-        private final JTextField txtTelefono = EstiloHotel.crearCampoTexto();
-        private final JTextField txtCorreo = EstiloHotel.crearCampoTexto();
-        private final JComboBox<String> cmbNacionalidad = new JComboBox<>(NACIONALIDADES);
-        private final JTextArea txtObservaciones = new JTextArea();
-
-        private final JTextField txtBuscar = EstiloHotel.crearCampoTexto();
-        private final DefaultTableModel modeloTabla = crearModeloTabla();
-        private final JTable tabla = new JTable(modeloTabla);
-        private final TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modeloTabla);
-
-        private Huesped huespedSeleccionado;
-
-        public PanelHuespedes() {
-
-            setLayout(new BorderLayout(20, 0));
-            setBackground(EstiloHotel.FONDO);
-            setBorder(new EmptyBorder(20, 24, 20, 24));
-
-            add(crearTarjetaFormulario(), BorderLayout.WEST);
-            add(crearTarjetaTabla(), BorderLayout.CENTER);
-
-            refrescarTabla();
-        }
-
-        private DefaultTableModel crearModeloTabla() {
-
-            return new DefaultTableModel(COLUMNAS, 0) {
-                @Override
-                public boolean isCellEditable(int fila, int columna) {
-                    return false;
-                }
-            };
-        }
-
-        private JPanel crearTarjetaFormulario() {
-
-            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 16));
-            tarjeta.setPreferredSize(new Dimension(620, 0));
-
-            tarjeta.add(EstiloHotel.crearEncabezadoCompacto(
-                    "R E G I S T R O",
-                    "Datos del huesped"), BorderLayout.NORTH);
-
-            JPanel formulario = new JPanel(new GridBagLayout());
-            formulario.setOpaque(false);
-
-            GridBagConstraints reglas = new GridBagConstraints();
-
-            EstiloHotel.configurarCombo(cmbNacionalidad);
-
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 0, "Identificacion:", txtIdentificacion);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 1, "Telefono:", txtTelefono);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 0, "Nombre:", txtNombre);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 1, "Correo:", txtCorreo);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 0, "Apellidos:", txtApellidos);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 1, "Nacionalidad:", cmbNacionalidad);
-            EstiloHotel.agregarFilaAncha(formulario, reglas, 3, "Observaciones:",
-                    EstiloHotel.crearAreaTexto(txtObservaciones, 3));
-
-            JScrollPane desplazamiento = new JScrollPane(formulario);
-            desplazamiento.setBorder(null);
-            desplazamiento.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            desplazamiento.setOpaque(false);
-            desplazamiento.getViewport().setOpaque(false);
-            desplazamiento.getVerticalScrollBar().setUnitIncrement(16);
-
-            tarjeta.add(desplazamiento, BorderLayout.CENTER);
-            tarjeta.add(crearBotones(), BorderLayout.SOUTH);
-
-            return tarjeta;
-        }
-
-        private JPanel crearBotones() {
-
-            JPanel botones = new JPanel(new GridLayout(1, 5, 8, 0));
-            botones.setOpaque(false);
-
-            JButton btnNuevo = EstiloHotel.crearBoton("Nuevo", EstiloHotel.VERDE, Color.WHITE);
-            JButton btnGuardar = EstiloHotel.crearBoton("Guardar", EstiloHotel.DORADO, Color.WHITE);
-            JButton btnEditar = EstiloHotel.crearBoton("Editar", EstiloHotel.CAFE, Color.WHITE);
-            JButton btnEliminar = EstiloHotel.crearBoton("Eliminar", EstiloHotel.ROJO, Color.WHITE);
-            JButton btnLimpiar = EstiloHotel.crearBotonBorde("Limpiar", EstiloHotel.BRONCE);
-
-            btnNuevo.addActionListener(e -> prepararNuevo());
-            btnGuardar.addActionListener(e -> guardarHuesped());
-            btnEditar.addActionListener(e -> editarHuesped());
-            btnEliminar.addActionListener(e -> eliminarHuesped());
-            btnLimpiar.addActionListener(e -> limpiarFormulario());
-
-            botones.add(btnNuevo);
-            botones.add(btnGuardar);
-            botones.add(btnEditar);
-            botones.add(btnEliminar);
-            botones.add(btnLimpiar);
-
-            return botones;
-        }
-
-        private JPanel crearTarjetaTabla() {
-
-            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
-
-            JPanel arriba = new JPanel(new BorderLayout(20, 0));
-            arriba.setOpaque(false);
-
-            arriba.add(EstiloHotel.crearEncabezado(
-                    "H U E S P E D E S",
-                    "Huespedes registrados",
-                    "Seleccione una fila para cargar sus datos en el formulario."),
-                    BorderLayout.CENTER);
-
-            JPanel buscador = new JPanel(new BorderLayout(8, 0));
-            buscador.setOpaque(false);
-            buscador.setPreferredSize(new Dimension(300, 32));
-
-            JLabel lblBuscar = new JLabel("Buscar:");
-            lblBuscar.setFont(EstiloHotel.ETIQUETA);
-            lblBuscar.setForeground(EstiloHotel.CAFE);
-
-            buscador.add(lblBuscar, BorderLayout.WEST);
-            buscador.add(txtBuscar, BorderLayout.CENTER);
-
-            JPanel contenedorBuscador = new JPanel(new BorderLayout());
-            contenedorBuscador.setOpaque(false);
-            contenedorBuscador.add(buscador, BorderLayout.NORTH);
-
-            arriba.add(contenedorBuscador, BorderLayout.EAST);
-
-            tarjeta.add(arriba, BorderLayout.NORTH);
-
-            EstiloHotel.configurarTabla(tabla);
-            tabla.setRowSorter(ordenador);
-
-            tarjeta.add(EstiloHotel.crearScrollTabla(tabla), BorderLayout.CENTER);
-
-            tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-
-                    if (e.getValueIsAdjusting()) {
-                        return;
-                    }
-
-                    cargarHuespedSeleccionado();
-                }
-            });
-
-            txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    filtrarTabla();
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    filtrarTabla();
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    filtrarTabla();
-                }
-            });
-
-            return tarjeta;
-        }
-
-        private void refrescarTabla() {
-
-            modeloTabla.setRowCount(0);
-
-            for (Huesped huesped : DatosHotel.getHuespedes()) {
-                modeloTabla.addRow(new Object[]{
-                        huesped.getIdentificacion(),
-                        huesped.getNombreCompleto(),
-                        huesped.getTelefono(),
-                        huesped.getCorreo(),
-                        huesped.getNacionalidad()
-                });
-            }
-        }
-
-        private void filtrarTabla() {
-
-            String texto = txtBuscar.getText().trim();
-
-            if (texto.isEmpty()) {
-                ordenador.setRowFilter(null);
-            } else {
-                ordenador.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
-            }
-        }
-
-        private void prepararNuevo() {
-
-            limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this,
-                    "Puede registrar un huesped nuevo.",
-                    "Nuevo huesped",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void guardarHuesped() {
-
-            if (!validarFormulario(null)) {
-                return;
-            }
-
-            Huesped huesped = new Huesped(
-                    txtIdentificacion.getText().trim(),
-                    txtNombre.getText().trim(),
-                    txtApellidos.getText().trim(),
-                    txtTelefono.getText().trim(),
-                    txtCorreo.getText().trim(),
-                    (String) cmbNacionalidad.getSelectedItem(),
-                    txtObservaciones.getText().trim());
-
-            DatosHotel.agregarHuesped(huesped);
-
-            refrescarTabla();
-            limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this,
-                    "Huesped guardado correctamente.",
-                    "Guardar",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void editarHuesped() {
-
-            if (huespedSeleccionado == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Seleccione en la tabla el huesped que desea editar.",
-                        "Editar",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (!validarFormulario(huespedSeleccionado)) {
-                return;
-            }
-
-            huespedSeleccionado.setIdentificacion(txtIdentificacion.getText().trim());
-            huespedSeleccionado.setNombre(txtNombre.getText().trim());
-            huespedSeleccionado.setApellidos(txtApellidos.getText().trim());
-            huespedSeleccionado.setTelefono(txtTelefono.getText().trim());
-            huespedSeleccionado.setCorreo(txtCorreo.getText().trim());
-            huespedSeleccionado.setNacionalidad((String) cmbNacionalidad.getSelectedItem());
-            huespedSeleccionado.setObservaciones(txtObservaciones.getText().trim());
-
-            refrescarTabla();
-            limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this,
-                    "Huesped actualizado correctamente.",
-                    "Editar",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void eliminarHuesped() {
-
-            if (huespedSeleccionado == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Seleccione en la tabla el huesped que desea eliminar.",
-                        "Eliminar",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (DatosHotel.tieneReservacionesActivas(huespedSeleccionado)) {
-                JOptionPane.showMessageDialog(this,
-                        "No se puede eliminar el huesped porque tiene reservaciones activas.\n"
-                                + "Primero cancele o finalice esas reservaciones.",
-                        "Eliminar",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            int respuesta = JOptionPane.showConfirmDialog(this,
-                    "Desea eliminar al huesped " + huespedSeleccionado.getNombreCompleto() + "?",
-                    "Confirmar eliminacion",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
-
-            if (respuesta == JOptionPane.YES_OPTION) {
-
-                DatosHotel.eliminarHuesped(huespedSeleccionado);
-
-                refrescarTabla();
-                limpiarFormulario();
-
-                JOptionPane.showMessageDialog(this,
-                        "Huesped eliminado correctamente.",
-                        "Eliminar",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-
-        private void limpiarFormulario() {
-
-            txtIdentificacion.setText("");
-            txtNombre.setText("");
-            txtApellidos.setText("");
-            txtTelefono.setText("");
-            txtCorreo.setText("");
-            txtObservaciones.setText("");
-            cmbNacionalidad.setSelectedIndex(0);
-
-            huespedSeleccionado = null;
-
-            tabla.clearSelection();
-            txtIdentificacion.requestFocusInWindow();
-        }
-
-        private void cargarHuespedSeleccionado() {
-
-            int filaVista = tabla.getSelectedRow();
-
-            if (filaVista == -1) {
-                return;
-            }
-
-            int filaModelo = tabla.convertRowIndexToModel(filaVista);
-
-            huespedSeleccionado = DatosHotel.getHuespedes().get(filaModelo);
-
-            txtIdentificacion.setText(huespedSeleccionado.getIdentificacion());
-            txtNombre.setText(huespedSeleccionado.getNombre());
-            txtApellidos.setText(huespedSeleccionado.getApellidos());
-            txtTelefono.setText(huespedSeleccionado.getTelefono());
-            txtCorreo.setText(huespedSeleccionado.getCorreo());
-            txtObservaciones.setText(huespedSeleccionado.getObservaciones());
-            cmbNacionalidad.setSelectedItem(huespedSeleccionado.getNacionalidad());
-        }
-
-        private boolean validarFormulario(Huesped excepcion) {
-
-            String identificacion = txtIdentificacion.getText().trim();
-            String nombre = txtNombre.getText().trim();
-            String apellidos = txtApellidos.getText().trim();
-            String telefono = txtTelefono.getText().trim();
-            String correo = txtCorreo.getText().trim();
-
-            if (identificacion.isEmpty() || nombre.isEmpty() || apellidos.isEmpty()
-                    || telefono.isEmpty() || correo.isEmpty()) {
-
-                mostrarAdvertencia("Identificacion, nombre, apellidos, telefono y correo "
-                        + "son obligatorios.");
-                return false;
-            }
-
-            if (!identificacion.matches("\\d+")) {
-                mostrarAdvertencia("La identificacion solo puede tener numeros.");
-                txtIdentificacion.requestFocusInWindow();
-                return false;
-            }
-
-            if (DatosHotel.existeIdentificacion(identificacion, excepcion)) {
-                mostrarAdvertencia("Ya existe un huesped registrado con la identificacion "
-                        + identificacion + ".");
-                txtIdentificacion.requestFocusInWindow();
-                return false;
-            }
-
-            if (!telefono.matches("\\d{8}")) {
-                mostrarAdvertencia("El telefono debe tener exactamente 8 digitos.");
-                txtTelefono.requestFocusInWindow();
-                return false;
-            }
-
-            if (!correo.matches(PATRON_CORREO)) {
-                mostrarAdvertencia("El correo no tiene un formato valido.\n"
-                        + "Ejemplo: nombre@correo.com");
-                txtCorreo.requestFocusInWindow();
-                return false;
-            }
-
-            return true;
-        }
-
-        private void mostrarAdvertencia(String mensaje) {
-            JOptionPane.showMessageDialog(this, mensaje, "Validacion", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private static class PanelReservaciones extends JPanel {
-
-        private static final String[] COLUMNAS = {
-                "#", "Huesped", "Hab.", "Tipo", "Entrada", "Salida",
-                "Noches", "Pers.", "Estado", "Total"
-        };
-
-        private static final int COLUMNA_TIPO = 3;
-        private static final int COLUMNA_ESTADO = 8;
-
-        private static final String[] TIPOS = {"Todos", "Standard", "Deluxe", "Suite"};
-        private static final String[] ESTADOS = {"Todos", "Activa", "Cancelada", "Finalizada"};
-
-        private final JComboBox<Huesped> cmbHuesped = new JComboBox<>();
-        private final JComboBox<String> cmbTipo = new JComboBox<>(TIPOS);
-        private final JComboBox<Habitacion> cmbHabitacion = new JComboBox<>();
-        private final JSpinner spCantidadHabitaciones =
-                new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
-        private final JSpinner spFechaEntrada = new JSpinner(new SpinnerDateModel());
-        private final JSpinner spFechaSalida = new JSpinner(new SpinnerDateModel());
-        private final JSpinner spAdultos = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
-        private final JSpinner spNinos = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
-
-        private final ButtonGroup grupoEstado = new ButtonGroup();
-        private final JRadioButton rbActiva =
-                EstiloHotel.crearOpcion("Activa", grupoEstado, true);
-        private final JRadioButton rbCancelada =
-                EstiloHotel.crearOpcion("Cancelada", grupoEstado, false);
-        private final JRadioButton rbFinalizada =
-                EstiloHotel.crearOpcion("Finalizada", grupoEstado, false);
-
-        private final JCheckBox chkDesayuno = EstiloHotel.crearCasilla("Desayuno");
-        private final JCheckBox chkParqueo = EstiloHotel.crearCasilla("Parqueo");
-        private final JCheckBox chkSpa = EstiloHotel.crearCasilla("Spa");
-
-        private final JLabel lblTotal = new JLabel("$0.00");
-        private final JLabel lblDetalleTotal = new JLabel("Seleccione fechas y habitacion");
-
-        private final JTextField txtBuscar = EstiloHotel.crearCampoTexto();
-        private final JComboBox<String> cmbFiltroEstado = new JComboBox<>(ESTADOS);
-        private final JComboBox<String> cmbFiltroTipo = new JComboBox<>(TIPOS);
-        private final DefaultTableModel modeloTabla = crearModeloTabla();
-        private final JTable tabla = new JTable(modeloTabla);
-        private final TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modeloTabla);
-
-        private Reservacion reservacionSeleccionada;
-
-        private boolean cargandoDatos;
-
-        public PanelReservaciones() {
-
-            setLayout(new BorderLayout(20, 0));
-            setBackground(EstiloHotel.FONDO);
-            setBorder(new EmptyBorder(20, 24, 20, 24));
-
-            configurarComponentes();
-
-            add(crearTarjetaFormulario(), BorderLayout.WEST);
-            add(crearTarjetaTabla(), BorderLayout.CENTER);
-
-            actualizarListas();
-        }
-
-        private DefaultTableModel crearModeloTabla() {
-
-            return new DefaultTableModel(COLUMNAS, 0) {
-                @Override
-                public boolean isCellEditable(int fila, int columna) {
-                    return false;
-                }
-            };
-        }
-
-        private void configurarComponentes() {
-
-            EstiloHotel.configurarCombo(cmbHuesped);
-            EstiloHotel.configurarCombo(cmbTipo);
-            EstiloHotel.configurarCombo(cmbHabitacion);
-            EstiloHotel.configurarCombo(cmbFiltroEstado);
-            EstiloHotel.configurarCombo(cmbFiltroTipo);
-
-            spFechaEntrada.setEditor(new JSpinner.DateEditor(spFechaEntrada, "dd/MM/yyyy"));
-            spFechaSalida.setEditor(new JSpinner.DateEditor(spFechaSalida, "dd/MM/yyyy"));
-
-            spFechaEntrada.setValue(aDate(LocalDate.now()));
-            spFechaSalida.setValue(aDate(LocalDate.now().plusDays(1)));
-
-            EstiloHotel.configurarSpinner(spFechaEntrada);
-            EstiloHotel.configurarSpinner(spFechaSalida);
-            EstiloHotel.configurarSpinner(spAdultos);
-            EstiloHotel.configurarSpinner(spNinos);
-            EstiloHotel.configurarSpinner(spCantidadHabitaciones);
-
-            ChangeListener recalcular = new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    actualizarTotal();
-                }
-            };
-
-            spFechaEntrada.addChangeListener(recalcular);
-            spFechaSalida.addChangeListener(recalcular);
-            spCantidadHabitaciones.addChangeListener(recalcular);
-            spAdultos.addChangeListener(recalcular);
-            spNinos.addChangeListener(recalcular);
-
-            chkDesayuno.addActionListener(e -> actualizarTotal());
-            chkParqueo.addActionListener(e -> actualizarTotal());
-            chkSpa.addActionListener(e -> actualizarTotal());
-
-            cmbTipo.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-
-                    if (e.getStateChange() == ItemEvent.SELECTED && !cargandoDatos) {
-                        recargarHabitaciones();
-                    }
-                }
-            });
-
-            cmbHabitacion.addActionListener(e -> {
-                if (!cargandoDatos) {
-                    actualizarTotal();
-                }
-            });
-
-            lblTotal.setFont(EstiloHotel.TOTAL);
-            lblTotal.setForeground(EstiloHotel.BRONCE);
-
-            lblDetalleTotal.setFont(EstiloHotel.PEQUENA);
-            lblDetalleTotal.setForeground(EstiloHotel.TEXTO_SUAVE);
-        }
-
-        private JPanel crearTarjetaFormulario() {
-
-            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
-            tarjeta.setPreferredSize(new Dimension(700, 0));
-
-            tarjeta.add(EstiloHotel.crearEncabezadoCompacto(
-                    "R E S E R V A R",
-                    "Datos de la reservacion"), BorderLayout.NORTH);
-
-            JPanel formulario = new JPanel(new GridBagLayout());
-            formulario.setOpaque(false);
-
-            GridBagConstraints reglas = new GridBagConstraints();
-
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 0, "Huesped:", cmbHuesped);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 1, "Fecha de entrada:", spFechaEntrada);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 0, "Tipo de habitacion:", cmbTipo);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 1, "Fecha de salida:", spFechaSalida);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 0, "Habitacion:", cmbHabitacion);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 1, "Adultos:", spAdultos);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 3, 0, "Cantidad:", spCantidadHabitaciones);
-            EstiloHotel.agregarFilaFormulario(formulario, reglas, 3, 1, "Ninos:", spNinos);
-            EstiloHotel.agregarFilaAncha(formulario, reglas, 4, "Estado:", crearPanelEstado());
-            EstiloHotel.agregarFilaAncha(formulario, reglas, 5, "Servicios:", crearPanelServicios());
-
-            JPanel contenido = new JPanel(new BorderLayout(0, 12));
-            contenido.setOpaque(false);
-            contenido.add(formulario, BorderLayout.NORTH);
-            contenido.add(crearPanelTotal(), BorderLayout.CENTER);
-
-            JScrollPane desplazamiento = new JScrollPane(contenido);
-            desplazamiento.setBorder(null);
-            desplazamiento.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            desplazamiento.setOpaque(false);
-            desplazamiento.getViewport().setOpaque(false);
-            desplazamiento.getVerticalScrollBar().setUnitIncrement(16);
-
-            tarjeta.add(desplazamiento, BorderLayout.CENTER);
-            tarjeta.add(crearBotones(), BorderLayout.SOUTH);
-
-            return tarjeta;
-        }
-
-        private JPanel crearPanelEstado() {
-
-            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-            panel.setOpaque(false);
-
-            panel.add(rbActiva);
-            panel.add(rbCancelada);
-            panel.add(rbFinalizada);
-
-            return panel;
-        }
-
-        private JPanel crearPanelServicios() {
-
-            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-            panel.setOpaque(false);
-
-            panel.add(chkDesayuno);
-            panel.add(chkParqueo);
-            panel.add(chkSpa);
-
-            return panel;
-        }
-
-        private JPanel crearPanelTotal() {
-
-            PanelRedondeado panel = new PanelRedondeado(
-                    new BorderLayout(0, 4), EstiloHotel.BEIGE_CLARO, EstiloHotel.BORDE, 10);
-            panel.setBorder(new EmptyBorder(14, 18, 14, 18));
-
-            JLabel titulo = new JLabel("TOTAL A PAGAR");
-            titulo.setFont(EstiloHotel.MINI);
-            titulo.setForeground(EstiloHotel.TEXTO_SUAVE);
-
-            JPanel superior = new JPanel(new BorderLayout());
-            superior.setOpaque(false);
-            superior.add(titulo, BorderLayout.NORTH);
-            superior.add(lblTotal, BorderLayout.CENTER);
-
-            panel.add(superior, BorderLayout.CENTER);
-            panel.add(lblDetalleTotal, BorderLayout.SOUTH);
-
-            JPanel contenedor = new JPanel(new BorderLayout());
-            contenedor.setOpaque(false);
-            contenedor.add(panel, BorderLayout.NORTH);
-
-            return contenedor;
-        }
-
-        private JPanel crearBotones() {
-
-            JPanel botones = new JPanel(new GridLayout(1, 6, 8, 0));
-            botones.setOpaque(false);
-
-            JButton btnNuevo = EstiloHotel.crearBoton("Nuevo", EstiloHotel.VERDE, Color.WHITE);
-            JButton btnGuardar = EstiloHotel.crearBoton("Guardar", EstiloHotel.DORADO, Color.WHITE);
-            JButton btnEditar = EstiloHotel.crearBoton("Editar", EstiloHotel.CAFE, Color.WHITE);
-            JButton btnEliminar = EstiloHotel.crearBoton("Eliminar", EstiloHotel.ROJO, Color.WHITE);
-            JButton btnLimpiar = EstiloHotel.crearBotonBorde("Limpiar", EstiloHotel.BRONCE);
-            JButton btnCancelar = EstiloHotel.crearBotonBorde("Cancelar", EstiloHotel.ROJO);
-
-            btnNuevo.addActionListener(e -> prepararNueva());
-            btnGuardar.addActionListener(e -> guardarReservacion());
-            btnEditar.addActionListener(e -> editarReservacion());
-            btnEliminar.addActionListener(e -> eliminarReservacion());
-            btnLimpiar.addActionListener(e -> limpiarFormulario());
-            btnCancelar.addActionListener(e -> cancelarReservacion());
-
-            botones.add(btnNuevo);
-            botones.add(btnGuardar);
-            botones.add(btnEditar);
-            botones.add(btnEliminar);
-            botones.add(btnLimpiar);
-            botones.add(btnCancelar);
-
-            return botones;
-        }
-
-        private JPanel crearTarjetaTabla() {
-
-            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
-
-            JPanel arriba = new JPanel(new BorderLayout(0, 12));
-            arriba.setOpaque(false);
-
-            arriba.add(EstiloHotel.crearEncabezado(
-                    "R E S E R V A C I O N E S",
-                    "Reservaciones registradas",
-                    "Seleccione una fila para cargarla en el formulario."),
-                    BorderLayout.NORTH);
-
-            arriba.add(crearBarraFiltros(), BorderLayout.SOUTH);
-
-            tarjeta.add(arriba, BorderLayout.NORTH);
-
-            EstiloHotel.configurarTabla(tabla);
-            tabla.setRowSorter(ordenador);
-            ajustarAnchoColumnas();
-
-            tarjeta.add(EstiloHotel.crearScrollTabla(tabla), BorderLayout.CENTER);
-
-            tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-
-                    if (e.getValueIsAdjusting()) {
-                        return;
-                    }
-
-                    cargarReservacionSeleccionada();
-                }
-            });
-
-            return tarjeta;
-        }
-
-        private void ajustarAnchoColumnas() {
-
-            int[] anchos = {36, 150, 52, 80, 84, 84, 56, 48, 78, 80};
-
-            for (int i = 0; i < anchos.length; i++) {
-                tabla.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
-            }
-        }
-
-        private JPanel crearBarraFiltros() {
-
-            JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-            barra.setOpaque(false);
-
-            JLabel lblBuscar = new JLabel("Buscar:");
-            lblBuscar.setFont(EstiloHotel.ETIQUETA);
-            lblBuscar.setForeground(EstiloHotel.CAFE);
-
-            txtBuscar.setPreferredSize(new Dimension(190, 32));
-            cmbFiltroEstado.setPreferredSize(new Dimension(140, 32));
-            cmbFiltroTipo.setPreferredSize(new Dimension(140, 32));
-
-            JLabel lblEstado = new JLabel("Estado:");
-            lblEstado.setFont(EstiloHotel.ETIQUETA);
-            lblEstado.setForeground(EstiloHotel.CAFE);
-
-            JLabel lblTipo = new JLabel("Tipo:");
-            lblTipo.setFont(EstiloHotel.ETIQUETA);
-            lblTipo.setForeground(EstiloHotel.CAFE);
-
-            barra.add(lblBuscar);
-            barra.add(txtBuscar);
-            barra.add(lblEstado);
-            barra.add(cmbFiltroEstado);
-            barra.add(lblTipo);
-            barra.add(cmbFiltroTipo);
-
-            txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    aplicarFiltros();
-                }
-
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    aplicarFiltros();
-                }
-
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    aplicarFiltros();
-                }
-            });
-
-            ItemListener filtro = new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-
-                    if (e.getStateChange() == ItemEvent.SELECTED) {
-                        aplicarFiltros();
-                    }
-                }
-            };
-
-            cmbFiltroEstado.addItemListener(filtro);
-            cmbFiltroTipo.addItemListener(filtro);
-
-            return barra;
-        }
-
-        private void aplicarFiltros() {
-
-            List<RowFilter<Object, Object>> filtros = new ArrayList<>();
-
-            String texto = txtBuscar.getText().trim();
-
-            if (!texto.isEmpty()) {
-                filtros.add(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
-            }
-
-            if (cmbFiltroEstado.getSelectedIndex() > 0) {
-                filtros.add(RowFilter.regexFilter(
-                        "^" + Pattern.quote((String) cmbFiltroEstado.getSelectedItem()) + "$",
-                        COLUMNA_ESTADO));
-            }
-
-            if (cmbFiltroTipo.getSelectedIndex() > 0) {
-                filtros.add(RowFilter.regexFilter(
-                        "^" + Pattern.quote((String) cmbFiltroTipo.getSelectedItem()) + "$",
-                        COLUMNA_TIPO));
-            }
-
-            if (filtros.isEmpty()) {
-                ordenador.setRowFilter(null);
-            } else {
-                ordenador.setRowFilter(RowFilter.andFilter(filtros));
-            }
-        }
-
-        private void refrescarTabla() {
-
-            modeloTabla.setRowCount(0);
-
-            for (Reservacion reservacion : DatosHotel.getReservaciones()) {
-                modeloTabla.addRow(new Object[]{
-                        reservacion.getNumero(),
-                        reservacion.getHuesped().getNombreCompleto(),
-                        reservacion.getHabitacion().getNumero(),
-                        reservacion.getHabitacion().getTipo(),
-                        reservacion.getFechaEntradaTexto(),
-                        reservacion.getFechaSalidaTexto(),
-                        reservacion.getNoches(),
-                        reservacion.getTotalPersonas(),
-                        reservacion.getEstado(),
-                        String.format("$%,.2f", reservacion.getTotal())
-                });
-            }
-
-            aplicarFiltros();
-        }
-
-        public void actualizarListas() {
-
-            cargandoDatos = true;
-
-            Huesped huespedActual = (Huesped) cmbHuesped.getSelectedItem();
-
-            cmbHuesped.removeAllItems();
-
-            for (Huesped huesped : DatosHotel.getHuespedes()) {
-                cmbHuesped.addItem(huesped);
-            }
-
-            if (huespedActual != null) {
-                cmbHuesped.setSelectedItem(huespedActual);
-            }
-
-            cargandoDatos = false;
-
-            recargarHabitaciones();
-            refrescarTabla();
-        }
-
-        private void recargarHabitaciones() {
-
-            cargandoDatos = true;
-
-            Habitacion habitacionActual = (Habitacion) cmbHabitacion.getSelectedItem();
-
-            Habitacion habitacionDeLaReserva = reservacionSeleccionada == null
-                    ? null
-                    : reservacionSeleccionada.getHabitacion();
-
-            cmbHabitacion.removeAllItems();
-
-            List<Habitacion> disponibles = DatosHotel.getHabitacionesDisponibles(
-                    (String) cmbTipo.getSelectedItem(), habitacionDeLaReserva);
-
-            for (Habitacion habitacion : disponibles) {
-                cmbHabitacion.addItem(habitacion);
-            }
-
-            if (habitacionActual != null && disponibles.contains(habitacionActual)) {
-                cmbHabitacion.setSelectedItem(habitacionActual);
-            }
-
-            cargandoDatos = false;
-
-            actualizarTotal();
-        }
-
-        private void actualizarTotal() {
-
-            Habitacion habitacion = (Habitacion) cmbHabitacion.getSelectedItem();
-            int noches = calcularNoches();
-
-            double total = Reservacion.calcularTotal(
-                    habitacion,
-                    noches,
-                    (Integer) spCantidadHabitaciones.getValue(),
-                    chkDesayuno.isSelected(),
-                    chkParqueo.isSelected(),
-                    chkSpa.isSelected());
-
-            lblTotal.setText(String.format("$%,.2f", total));
-
-            if (habitacion == null) {
-                lblDetalleTotal.setText("No hay habitaciones disponibles de ese tipo");
-            } else if (noches <= 0) {
-                lblDetalleTotal.setText("La salida debe ser despues de la entrada");
-            } else {
-                lblDetalleTotal.setText(noches + " noche(s) x $"
-                        + String.format("%.2f", habitacion.getPrecioPorNoche())
-                        + " x " + spCantidadHabitaciones.getValue() + " habitacion(es)");
-            }
-        }
-
-        private int calcularNoches() {
-            return (int) ChronoUnit.DAYS.between(getFechaEntrada(), getFechaSalida());
-        }
-
-        private void prepararNueva() {
-
-            limpiarFormulario();
-
-            JOptionPane.showMessageDialog(this,
-                    "Puede registrar una reservacion nueva.",
-                    "Nueva reservacion",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void guardarReservacion() {
-
-            if (!validarFormulario(null)) {
-                return;
-            }
-
-            Reservacion reservacion = new Reservacion(
-                    DatosHotel.tomarNumeroReservacion(),
-                    (Huesped) cmbHuesped.getSelectedItem(),
-                    (Habitacion) cmbHabitacion.getSelectedItem(),
-                    getFechaEntrada(),
-                    getFechaSalida(),
-                    (Integer) spAdultos.getValue(),
-                    (Integer) spNinos.getValue(),
-                    (Integer) spCantidadHabitaciones.getValue(),
-                    getEstadoSeleccionado(),
-                    chkDesayuno.isSelected(),
-                    chkParqueo.isSelected(),
-                    chkSpa.isSelected());
-
-            DatosHotel.agregarReservacion(reservacion);
-
-            actualizarEstadoHabitacion(reservacion, null);
-
-            limpiarFormulario();
-            actualizarListas();
-
-            JOptionPane.showMessageDialog(this,
-                    "Reservacion #" + reservacion.getNumero() + " guardada correctamente.\n"
-                            + "Total: " + String.format("$%,.2f", reservacion.getTotal()),
-                    "Guardar",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void editarReservacion() {
-
-            if (reservacionSeleccionada == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Seleccione en la tabla la reservacion que desea editar.",
-                        "Editar",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (!validarFormulario(reservacionSeleccionada)) {
-                return;
-            }
-
-            Habitacion habitacionAnterior = reservacionSeleccionada.getHabitacion();
-
-            reservacionSeleccionada.setHuesped((Huesped) cmbHuesped.getSelectedItem());
-            reservacionSeleccionada.setHabitacion((Habitacion) cmbHabitacion.getSelectedItem());
-            reservacionSeleccionada.setFechaEntrada(getFechaEntrada());
-            reservacionSeleccionada.setFechaSalida(getFechaSalida());
-            reservacionSeleccionada.setAdultos((Integer) spAdultos.getValue());
-            reservacionSeleccionada.setNinos((Integer) spNinos.getValue());
-            reservacionSeleccionada.setCantidadHabitaciones(
-                    (Integer) spCantidadHabitaciones.getValue());
-            reservacionSeleccionada.setEstado(getEstadoSeleccionado());
-            reservacionSeleccionada.setDesayuno(chkDesayuno.isSelected());
-            reservacionSeleccionada.setParqueo(chkParqueo.isSelected());
-            reservacionSeleccionada.setSpa(chkSpa.isSelected());
-
-            actualizarEstadoHabitacion(reservacionSeleccionada, habitacionAnterior);
-
-            limpiarFormulario();
-            actualizarListas();
-
-            JOptionPane.showMessageDialog(this,
-                    "Reservacion actualizada correctamente.",
-                    "Editar",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-
-        private void eliminarReservacion() {
-
-            if (reservacionSeleccionada == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Seleccione en la tabla la reservacion que desea eliminar.",
-                        "Eliminar",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            int respuesta = JOptionPane.showConfirmDialog(this,
-                    "Desea eliminar la reservacion #" + reservacionSeleccionada.getNumero() + "?",
-                    "Confirmar eliminacion",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
-
-            if (respuesta == JOptionPane.YES_OPTION) {
-
-                liberarHabitacion(reservacionSeleccionada.getHabitacion());
-
-                DatosHotel.eliminarReservacion(reservacionSeleccionada);
-
-                limpiarFormulario();
-                actualizarListas();
-
-                JOptionPane.showMessageDialog(this,
-                        "Reservacion eliminada correctamente.",
-                        "Eliminar",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-
-        private void cancelarReservacion() {
-
-            if (reservacionSeleccionada == null) {
-                JOptionPane.showMessageDialog(this,
-                        "Seleccione en la tabla la reservacion que desea cancelar.",
-                        "Cancelar reservacion",
-                        JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (Reservacion.CANCELADA.equals(reservacionSeleccionada.getEstado())) {
-                JOptionPane.showMessageDialog(this,
-                        "Esa reservacion ya estaba cancelada.",
-                        "Cancelar reservacion",
-                        JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-
-            int respuesta = JOptionPane.showConfirmDialog(this,
-                    "Desea cancelar la reservacion #" + reservacionSeleccionada.getNumero() + "?\n"
-                            + "La habitacion " + reservacionSeleccionada.getHabitacion().getNumero()
-                            + " quedara disponible.",
-                    "Confirmar cancelacion",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
-
-            if (respuesta == JOptionPane.YES_OPTION) {
-
-                reservacionSeleccionada.setEstado(Reservacion.CANCELADA);
-                liberarHabitacion(reservacionSeleccionada.getHabitacion());
-
-                limpiarFormulario();
-                actualizarListas();
-
-                JOptionPane.showMessageDialog(this,
-                        "Reservacion cancelada.",
-                        "Cancelar reservacion",
-                        JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-
-        private void limpiarFormulario() {
-
-            reservacionSeleccionada = null;
-
-            cargandoDatos = true;
-
-            if (cmbHuesped.getItemCount() > 0) {
-                cmbHuesped.setSelectedIndex(0);
-            }
-
-            cmbTipo.setSelectedIndex(0);
-
-            spFechaEntrada.setValue(aDate(LocalDate.now()));
-            spFechaSalida.setValue(aDate(LocalDate.now().plusDays(1)));
-            spAdultos.setValue(1);
-            spNinos.setValue(0);
-            spCantidadHabitaciones.setValue(1);
-
-            rbActiva.setSelected(true);
-
-            chkDesayuno.setSelected(false);
-            chkParqueo.setSelected(false);
-            chkSpa.setSelected(false);
-
-            cargandoDatos = false;
-
-            tabla.clearSelection();
-            recargarHabitaciones();
-        }
-
-        private void cargarReservacionSeleccionada() {
-
-            int filaVista = tabla.getSelectedRow();
-
-            if (filaVista == -1) {
-                return;
-            }
-
-            int filaModelo = tabla.convertRowIndexToModel(filaVista);
-
-            reservacionSeleccionada = DatosHotel.getReservaciones().get(filaModelo);
-
-            cargandoDatos = true;
-
-            cmbHuesped.setSelectedItem(reservacionSeleccionada.getHuesped());
-            cmbTipo.setSelectedItem(reservacionSeleccionada.getHabitacion().getTipo());
-
-            spFechaEntrada.setValue(aDate(reservacionSeleccionada.getFechaEntrada()));
-            spFechaSalida.setValue(aDate(reservacionSeleccionada.getFechaSalida()));
-            spAdultos.setValue(reservacionSeleccionada.getAdultos());
-            spNinos.setValue(reservacionSeleccionada.getNinos());
-            spCantidadHabitaciones.setValue(reservacionSeleccionada.getCantidadHabitaciones());
-
-            chkDesayuno.setSelected(reservacionSeleccionada.tieneDesayuno());
-            chkParqueo.setSelected(reservacionSeleccionada.tieneParqueo());
-            chkSpa.setSelected(reservacionSeleccionada.tieneSpa());
-
-            if (Reservacion.ACTIVA.equals(reservacionSeleccionada.getEstado())) {
-                rbActiva.setSelected(true);
-            } else if (Reservacion.CANCELADA.equals(reservacionSeleccionada.getEstado())) {
-                rbCancelada.setSelected(true);
-            } else {
-                rbFinalizada.setSelected(true);
-            }
-
-            cargandoDatos = false;
-
-            recargarHabitaciones();
-            cmbHabitacion.setSelectedItem(reservacionSeleccionada.getHabitacion());
-        }
-
-        private boolean validarFormulario(Reservacion excepcion) {
-
-            Huesped huesped = (Huesped) cmbHuesped.getSelectedItem();
-            Habitacion habitacion = (Habitacion) cmbHabitacion.getSelectedItem();
-
-            if (huesped == null) {
-                mostrarAdvertencia("Primero debe registrar un huesped en el modulo de Huespedes.");
-                return false;
-            }
-
-            if (habitacion == null) {
-                mostrarAdvertencia("No hay habitaciones disponibles de ese tipo.\n"
-                        + "Elija otro tipo de habitacion.");
-                return false;
-            }
-
-            if (calcularNoches() <= 0) {
-                mostrarAdvertencia("La fecha de salida debe ser posterior a la fecha de entrada.");
-                return false;
-            }
-
-            boolean esLaMismaDeAntes = excepcion != null && excepcion.getHabitacion() == habitacion;
-
-            if (!habitacion.estaDisponible() && !esLaMismaDeAntes) {
-                mostrarAdvertencia("La habitacion " + habitacion.getNumero()
-                        + " esta en estado " + habitacion.getEstado() + ".\n"
-                        + "Seleccione una habitacion disponible.");
-                return false;
-            }
-
-            int personas = (Integer) spAdultos.getValue() + (Integer) spNinos.getValue();
-            int capacidadTotal = habitacion.getCapacidad()
-                    * (Integer) spCantidadHabitaciones.getValue();
-
-            if (personas > capacidadTotal) {
-                mostrarAdvertencia("La habitacion " + habitacion.getNumero() + " admite hasta "
-                        + capacidadTotal + " persona(s) y usted registro " + personas + ".\n"
-                        + "Aumente la cantidad de habitaciones o elija una mas grande.");
-                return false;
-            }
-
-            return true;
-        }
-
-        private void mostrarAdvertencia(String mensaje) {
-            JOptionPane.showMessageDialog(this, mensaje, "Validacion", JOptionPane.WARNING_MESSAGE);
-        }
-
-        private void actualizarEstadoHabitacion(Reservacion reservacion, Habitacion habitacionAnterior) {
-
-            if (habitacionAnterior != null && habitacionAnterior != reservacion.getHabitacion()) {
-                liberarHabitacion(habitacionAnterior);
-            }
-
-            Habitacion habitacion = reservacion.getHabitacion();
-
-            if (reservacion.estaActiva()) {
-                habitacion.setEstado(Habitacion.OCUPADA);
-            } else {
-                liberarHabitacion(habitacion);
-            }
-        }
-
-        private void liberarHabitacion(Habitacion habitacion) {
-
-            if (habitacion != null && Habitacion.OCUPADA.equals(habitacion.getEstado())) {
-                habitacion.setEstado(Habitacion.DISPONIBLE);
-            }
-        }
-
-        private String getEstadoSeleccionado() {
-
-            if (rbCancelada.isSelected()) {
-                return Reservacion.CANCELADA;
-            }
-
-            if (rbFinalizada.isSelected()) {
-                return Reservacion.FINALIZADA;
-            }
-
-            return Reservacion.ACTIVA;
-        }
-
-        private LocalDate getFechaEntrada() {
-            return aLocalDate((Date) spFechaEntrada.getValue());
-        }
-
-        private LocalDate getFechaSalida() {
-            return aLocalDate((Date) spFechaSalida.getValue());
-        }
-
-        private static LocalDate aLocalDate(Date fecha) {
-            return fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        }
-
-        private static Date aDate(LocalDate fecha) {
-            return Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant());
         }
     }
 
