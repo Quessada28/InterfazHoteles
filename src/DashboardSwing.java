@@ -1,15 +1,23 @@
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
 import javax.swing.event.DocumentEvent.*;
 import javax.swing.event.DocumentListener.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 //Investigar como canviarle el lookAndFeel
 
@@ -73,6 +81,18 @@ public class DashboardSwing extends JFrame {
     private String seccionActiva = "INICIO";
 
     private JScrollPane desplazamientoInicio;
+    private PanelPortada portada;
+
+    private PanelHabitaciones panelHabitaciones;
+    private PanelHuespedes panelHuespedes;
+    private PanelReservaciones panelReservaciones;
+    private PanelReportes panelReportes;
+
+    private JLabel lblIndicadorDisponibles;
+    private JLabel lblIndicadorOcupadas;
+    private JLabel lblIndicadorReservaciones;
+    private JLabel lblIndicadorIngresos;
+
     private JLabel lblTituloPortada;
     private JLabel lblRutaPortada;
     private JLabel lblSubtitulo;
@@ -83,7 +103,7 @@ public class DashboardSwing extends JFrame {
 
         configurarLookAndFeel();
 
-        setTitle("Royelle Luxury Hotel - Sistema de Gestión Hotelera");
+        setTitle("Tabacon Hotel - Sistema de Gestión Hotelera");
         setSize(1500, 930);
         setMinimumSize(new Dimension(1250, 760));
         setLocationRelativeTo(null);
@@ -139,8 +159,8 @@ public class DashboardSwing extends JFrame {
         izquierda.setOpaque(false);
 
         izquierda.add(crearDatoContacto("✆", "(506) 2222-0000"));
-        izquierda.add(crearDatoContacto("✉", "reservaciones@royelle.com"));
-        izquierda.add(crearDatoContacto("⌖", "Playa Hermosa, Guanacaste, Costa Rica"));
+        izquierda.add(crearDatoContacto("✉", "TabaconHotel@gmail.com"));
+        izquierda.add(crearDatoContacto("⌖", "La Fortuna, San Jose, Costa Rica"));
 
         JLabel lblSesion = new JLabel(textoConIcono("☺", "Recepción  ·  Administrador"));
         lblSesion.setFont(FUENTE_MINI);
@@ -163,13 +183,13 @@ public class DashboardSwing extends JFrame {
 
     private JPanel crearPortada() {
 
-        PanelPortada portada = new PanelPortada();
+        portada = new PanelPortada();
 
         JPanel textos = new JPanel();
         textos.setOpaque(false);
         textos.setLayout(new BoxLayout(textos, BoxLayout.Y_AXIS));
 
-        JLabel lblMarca = new JLabel("R O Y E L L E   L U X U R Y   H O T E L");
+        JLabel lblMarca = new JLabel("T A B A C O N   L U X U R Y   H O T E L");
         lblMarca.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblMarca.setForeground(COLOR_DORADO);
         lblMarca.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -214,32 +234,17 @@ public class DashboardSwing extends JFrame {
 
         contenedorPaneles.add(crearPanelInicio(), "INICIO");
 
-        contenedorPaneles.add(crearPanelPendiente(
-                "Módulo de Habitaciones",
-                "En esta sección se colocará el formulario de habitaciones (número, tipo, "
-                        + "precio por noche, capacidad, estado y amenidades), la JTable con los "
-                        + "registros, los botones Nuevo / Guardar / Editar / Eliminar / Limpiar "
-                        + "y el buscador dinámico.",
-                "Corresponde al punto 4 de la parte de Kevin."), "HABITACIONES");
+        panelHabitaciones = new PanelHabitaciones(this);
 
-        contenedorPaneles.add(crearPanelPendiente(
-                "Módulo de Huéspedes",
-                "En esta sección se colocará el formulario de registro de huéspedes junto con "
-                        + "su tabla, sus validaciones y sus operaciones CRUD.",
-                "Corresponde a la parte de Luis."), "HUESPEDES");
+        contenedorPaneles.add(panelHabitaciones, "HABITACIONES");
 
-        contenedorPaneles.add(crearPanelPendiente(
-                "Módulo de Reservaciones",
-                "En esta sección se colocará el registro de reservaciones con número y tipo de "
-                        + "habitación, fechas de entrada y salida, estado de la reserva y su tabla "
-                        + "con búsqueda.",
-                "Corresponde a la parte de Luis."), "RESERVACIONES");
+        panelHuespedes = new PanelHuespedes();
+        panelReservaciones = new PanelReservaciones();
+        panelReportes = new PanelReportes();
 
-        contenedorPaneles.add(crearPanelPendiente(
-                "Reportes del hotel",
-                "En esta sección se mostrarán los resúmenes de ocupación, reservaciones e "
-                        + "ingresos generados por el hotel.",
-                "Sección complementaria del sistema."), "REPORTES");
+        contenedorPaneles.add(panelHuespedes, "HUESPEDES");
+        contenedorPaneles.add(panelReservaciones, "RESERVACIONES");
+        contenedorPaneles.add(panelReportes, "REPORTES");
 
         contenedorPaneles.add(crearPanelAcercaDe(), "ACERCA");
 
@@ -389,7 +394,7 @@ public class DashboardSwing extends JFrame {
         lblEstado.setForeground(COLOR_ESTADO);
 
         JLabel lblCreditos = new JLabel(
-                "Royelle Luxury Hotel   ·   Proyecto Java Swing   ·   Kevin y Luis");
+                "Tabacon Hotel   ·   Proyecto Java Swing   ·   Kevin y Luis");
         lblCreditos.setFont(FUENTE_PEQUENA);
         lblCreditos.setForeground(new Color(176, 163, 148));
 
@@ -405,11 +410,7 @@ public class DashboardSwing extends JFrame {
         contenido.setBackground(COLOR_FONDO);
         contenido.setBorder(new EmptyBorder(24, 28, 24, 28));
 
-        contenido.add(crearTarjetaAviso(
-                "Tarjetas indicadoras",
-                "Aquí se colocarán las cuatro tarjetas del dashboard: habitaciones disponibles, "
-                        + "habitaciones ocupadas, reservaciones activas e ingresos del mes.",
-                "Corresponde al punto 3 de la parte de Kevin."), BorderLayout.NORTH);
+        contenido.add(crearTarjetasIndicadoras(), BorderLayout.NORTH);
 
         contenido.add(crearTarjetaServicios(), BorderLayout.CENTER);
 
@@ -423,6 +424,71 @@ public class DashboardSwing extends JFrame {
         panel.add(desplazamientoInicio, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private JPanel crearTarjetasIndicadoras() {
+
+        JPanel tarjetas = new JPanel(new GridLayout(1, 4, 18, 0));
+        tarjetas.setOpaque(false);
+        tarjetas.setPreferredSize(new Dimension(0, 122));
+
+        lblIndicadorDisponibles = new JLabel("0");
+        lblIndicadorOcupadas = new JLabel("0");
+        lblIndicadorReservaciones = new JLabel("0");
+        lblIndicadorIngresos = new JLabel("$0");
+
+        tarjetas.add(crearTarjetaIndicador("⌂", "HABITACIONES DISPONIBLES",
+                lblIndicadorDisponibles, "Listas para reservar"));
+        tarjetas.add(crearTarjetaIndicador("▤", "HABITACIONES OCUPADAS",
+                lblIndicadorOcupadas, "Con huéspedes dentro"));
+        tarjetas.add(crearTarjetaIndicador("★", "RESERVACIONES ACTIVAS",
+                lblIndicadorReservaciones, "En curso este mes"));
+        tarjetas.add(crearTarjetaIndicador("♨", "INGRESOS DEL MES",
+                lblIndicadorIngresos, "Acumulado del mes"));
+
+        actualizarTarjetas();
+
+        return tarjetas;
+    }
+
+    private JPanel crearTarjetaIndicador(String icono, String titulo, JLabel numero, String nota) {
+
+        PanelRedondeado tarjeta = new PanelRedondeado(
+                new BorderLayout(0, 6), Color.WHITE, COLOR_BORDE, 10);
+        tarjeta.setBorder(new EmptyBorder(18, 22, 18, 22));
+
+        JLabel lblTitulo = new JLabel(textoConIcono(icono, titulo, COLOR_BRONCE));
+        lblTitulo.setFont(FUENTE_MINI);
+        lblTitulo.setForeground(COLOR_TEXTO_SUAVE);
+
+        numero.setFont(new Font("Georgia", Font.BOLD, 30));
+        numero.setForeground(COLOR_CAFE);
+
+        JLabel lblNota = new JLabel(nota);
+        lblNota.setFont(FUENTE_MINI);
+        lblNota.setForeground(COLOR_TEXTO_SUAVE);
+
+        tarjeta.add(lblTitulo, BorderLayout.NORTH);
+        tarjeta.add(numero, BorderLayout.CENTER);
+        tarjeta.add(lblNota, BorderLayout.SOUTH);
+
+        return tarjeta;
+    }
+
+    public void actualizarTarjetas() {
+
+        if (lblIndicadorDisponibles == null) {
+            return;
+        }
+
+        lblIndicadorDisponibles.setText(
+                String.valueOf(DatosHotel.contarHabitaciones(Habitacion.DISPONIBLE)));
+        lblIndicadorOcupadas.setText(
+                String.valueOf(DatosHotel.contarHabitaciones(Habitacion.OCUPADA)));
+        lblIndicadorReservaciones.setText(
+                String.valueOf(DatosHotel.contarReservaciones(Reservacion.ACTIVA)));
+        lblIndicadorIngresos.setText(
+                String.format(Locale.US, "$%,.0f", DatosHotel.calcularIngresos()));
     }
 
     private JPanel crearTarjetaServicios() {
@@ -512,7 +578,7 @@ public class DashboardSwing extends JFrame {
         encabezado.setOpaque(false);
         encabezado.setLayout(new BoxLayout(encabezado, BoxLayout.Y_AXIS));
 
-        JLabel titulo = new JLabel("Sistema de Gestión Hotelera Royelle");
+        JLabel titulo = new JLabel("Sistema de Gestión Hotelera Tabacon");
         titulo.setFont(FUENTE_TITULO_TARJETA);
         titulo.setForeground(COLOR_CAFE);
         titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -633,6 +699,23 @@ public class DashboardSwing extends JFrame {
         seccionActiva = clave;
 
         gestorTarjetas.show(contenedorPaneles, clave);
+
+        boolean esInicio = clave.equals("INICIO");
+
+        portada.setPreferredSize(new Dimension(0, esInicio ? 258 : 112));
+        portada.revalidate();
+
+        if (esInicio) {
+            actualizarTarjetas();
+        }
+
+        if (clave.equals("RESERVACIONES")) {
+            panelReservaciones.actualizarListas();
+        }
+
+        if (clave.equals("REPORTES")) {
+            panelReportes.actualizarReporte();
+        }
 
         for (int i = 0; i < SECCIONES.length; i++) {
 
@@ -885,83 +968,2875 @@ public class DashboardSwing extends JFrame {
             super.paintComponent(g);
         }
     }
-    // Parte de Luis
 
-    public class Modelos {
-        public static class Huesped {
+    private static class EstiloHotel {
 
-            public String identificacion;
-            public String nombre;
-            public String apellidos;
-            public String telefono;
-            public String correo;
-            public String nacionalidad;
-            public String observaciones;
+        public static final Color CAFE = new Color(72, 54, 39);
+        public static final Color CAFE_OSCURO = new Color(50, 34, 22);
+        public static final Color BRONCE = new Color(174, 135, 76);
+        public static final Color DORADO = new Color(189, 149, 90);
+        public static final Color BEIGE = new Color(216, 209, 201);
+        public static final Color BEIGE_CLARO = new Color(241, 236, 229);
+        public static final Color FONDO = new Color(250, 248, 245);
+        public static final Color BORDE = new Color(224, 216, 206);
+        public static final Color TEXTO_SUAVE = new Color(128, 116, 104);
+        public static final Color VERDE = new Color(96, 122, 74);
+        public static final Color ROJO = new Color(166, 78, 62);
 
-            public String getNombreCompleto() {
-                return nombre + " " + apellidos;
-            }
+        public static final Font TITULO = new Font("Georgia", Font.BOLD, 21);
+        public static final Font SUBTITULO = new Font("Segoe UI", Font.PLAIN, 14);
+        public static final Font NORMAL = new Font("Segoe UI", Font.PLAIN, 14);
+        public static final Font PEQUENA = new Font("Segoe UI", Font.PLAIN, 13);
+        public static final Font ETIQUETA = new Font("Segoe UI", Font.BOLD, 13);
+        public static final Font MINI = new Font("Segoe UI", Font.PLAIN, 12);
+        public static final Font TOTAL = new Font("Georgia", Font.BOLD, 26);
 
-            @Override
-            public String toString() {
-                return identificacion + "-" + getNombreCompleto();
+        public static final String FUENTE_ICONOS = "Segoe UI Symbol";
+
+        private EstiloHotel() {
+        }
+
+        public static PanelRedondeado crearPanelRedondeado(LayoutManager distribucion,
+                                                           Color relleno, Color borde, int radio) {
+            return new PanelRedondeado(distribucion, relleno, borde, radio);
+        }
+
+        public static PanelRedondeado crearTarjeta(LayoutManager distribucion) {
+
+            PanelRedondeado tarjeta = new PanelRedondeado(distribucion, Color.WHITE, BORDE, 10);
+            tarjeta.setBorder(new EmptyBorder(20, 24, 20, 24));
+
+            return tarjeta;
+        }
+
+        public static JLabel crearEtiquetaSeccion(String texto) {
+
+            JLabel etiqueta = new JLabel(texto);
+            etiqueta.setFont(MINI);
+            etiqueta.setForeground(BRONCE);
+            etiqueta.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            return etiqueta;
+        }
+
+        public static JLabel crearTitulo(String texto) {
+
+            JLabel titulo = new JLabel(texto);
+            titulo.setFont(TITULO);
+            titulo.setForeground(CAFE);
+            titulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            return titulo;
+        }
+
+        public static JLabel crearSubtitulo(String texto) {
+
+            JLabel subtitulo = new JLabel(texto);
+            subtitulo.setFont(SUBTITULO);
+            subtitulo.setForeground(TEXTO_SUAVE);
+            subtitulo.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            return subtitulo;
+        }
+
+        public static JPanel crearLineaDorada() {
+
+            JPanel linea = new JPanel();
+            linea.setBackground(DORADO);
+            linea.setPreferredSize(new Dimension(58, 2));
+            linea.setMaximumSize(new Dimension(58, 2));
+            linea.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            return linea;
+        }
+
+        public static JPanel crearEncabezado(String etiqueta, String titulo, String descripcion) {
+
+            JPanel encabezado = new JPanel();
+            encabezado.setOpaque(false);
+            encabezado.setLayout(new BoxLayout(encabezado, BoxLayout.Y_AXIS));
+
+            encabezado.add(crearEtiquetaSeccion(etiqueta));
+            encabezado.add(Box.createVerticalStrut(8));
+            encabezado.add(crearTitulo(titulo));
+            encabezado.add(Box.createVerticalStrut(10));
+            encabezado.add(crearLineaDorada());
+            encabezado.add(Box.createVerticalStrut(10));
+            encabezado.add(crearSubtitulo(descripcion));
+
+            return encabezado;
+        }
+
+        public static JPanel crearEncabezado(String etiqueta, String titulo) {
+            return crearEncabezadoCompacto(etiqueta, titulo);
+        }
+
+        public static JPanel crearEncabezadoCompacto(String etiqueta, String titulo) {
+
+            JPanel encabezado = new JPanel();
+            encabezado.setOpaque(false);
+            encabezado.setLayout(new BoxLayout(encabezado, BoxLayout.Y_AXIS));
+
+            encabezado.add(crearEtiquetaSeccion(etiqueta));
+            encabezado.add(Box.createVerticalStrut(6));
+            encabezado.add(crearTitulo(titulo));
+            encabezado.add(Box.createVerticalStrut(8));
+            encabezado.add(crearLineaDorada());
+
+            return encabezado;
+        }
+
+        public static JTextField crearCampoTexto() {
+
+            JTextField campo = new JTextField();
+            campo.setFont(NORMAL);
+            campo.setForeground(CAFE);
+            campo.setPreferredSize(new Dimension(175, 32));
+            campo.setBorder(new CompoundBorder(
+                    new LineBorder(BORDE, 1, true),
+                    new EmptyBorder(4, 9, 4, 9)));
+
+            return campo;
+        }
+
+        public static JScrollPane crearAreaTexto(JTextArea area, int filas) {
+
+            area.setRows(filas);
+            area.setFont(NORMAL);
+            area.setForeground(CAFE);
+            area.setLineWrap(true);
+            area.setWrapStyleWord(true);
+            area.setBorder(new EmptyBorder(6, 8, 6, 8));
+
+            JScrollPane scroll = new JScrollPane(area);
+            scroll.setBorder(new LineBorder(BORDE, 1, true));
+            scroll.setPreferredSize(new Dimension(175, 66));
+
+            return scroll;
+        }
+
+        public static void configurarCombo(JComboBox<?> combo) {
+
+            combo.setFont(NORMAL);
+            combo.setForeground(CAFE);
+            combo.setBackground(Color.WHITE);
+            combo.setPreferredSize(new Dimension(175, 32));
+        }
+
+        public static void configurarSpinner(JSpinner spinner) {
+
+            spinner.setFont(NORMAL);
+            spinner.setPreferredSize(new Dimension(175, 32));
+
+            JComponent editor = spinner.getEditor();
+
+            if (editor instanceof JSpinner.DefaultEditor) {
+                ((JSpinner.DefaultEditor) editor).getTextField().setFont(NORMAL);
+                ((JSpinner.DefaultEditor) editor).getTextField().setForeground(CAFE);
             }
         }
 
+        public static JCheckBox crearCasilla(String texto) {
 
-        public static class Habitacion {
+            JCheckBox casilla = new JCheckBox(texto);
+            casilla.setFont(NORMAL);
+            casilla.setForeground(CAFE);
+            casilla.setOpaque(false);
+            casilla.setFocusPainted(false);
+            casilla.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-            public String numero;
-            public String tipo;
-            public double precioPorNoche;
-            public int capacidad;
-            public String estado;
-
-            @Override
-            public String toString() {
-                return numero + "-" + tipo + "(" + precioPorNoche + " / noche)";
-            }
+            return casilla;
         }
 
-        public static class Reservacion {
-            public int id;
-            public Modelos.Huesped huesped;
-            public Habitacion habitacion;
-            public Date fechaEntrada;
-            public Date fechaSalida;
-            public int adultos;
-            public int ninos;
-            public int cantidadHabitaciones;
-            public String estado;
-            public boolean desayuno;
-            public boolean parqueo;
-            public boolean spa;
-            public double total;
+        public static JRadioButton crearOpcion(String texto, ButtonGroup grupo, boolean seleccionado) {
 
-            public int getTotalHuespedes() {
-                return adultos + ninos;
-            }
+            JRadioButton opcion = new JRadioButton(texto, seleccionado);
+            opcion.setFont(NORMAL);
+            opcion.setForeground(CAFE);
+            opcion.setOpaque(false);
+            opcion.setFocusPainted(false);
+            opcion.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            grupo.add(opcion);
+
+            return opcion;
+        }
+
+        public static void agregarFilaFormulario(JPanel formulario, GridBagConstraints reglas,
+                                                 int fila, String etiqueta, Component componente) {
+
+            agregarFilaFormulario(formulario, reglas, fila, 0, etiqueta, componente);
+        }
+
+        public static void agregarFilaFormulario(JPanel formulario, GridBagConstraints reglas,
+                                                 int fila, int columna, String etiqueta,
+                                                 Component componente) {
+
+            reglas.gridx = columna * 2;
+            reglas.gridy = fila;
+            reglas.gridwidth = 1;
+            reglas.weightx = 0;
+            reglas.fill = GridBagConstraints.HORIZONTAL;
+            reglas.anchor = GridBagConstraints.WEST;
+            reglas.insets = new Insets(5, columna == 0 ? 0 : 20, 5, 10);
+
+            JLabel lbl = new JLabel(etiqueta);
+            lbl.setFont(ETIQUETA);
+            lbl.setForeground(CAFE);
+
+            formulario.add(lbl, reglas);
+
+            reglas.gridx = columna * 2 + 1;
+            reglas.weightx = 1;
+            reglas.insets = new Insets(5, 0, 5, 0);
+
+            formulario.add(componente, reglas);
+        }
+
+        public static void agregarFilaAncha(JPanel formulario, GridBagConstraints reglas,
+                                            int fila, String etiqueta, Component componente) {
+
+            reglas.gridx = 0;
+            reglas.gridy = fila;
+            reglas.gridwidth = 1;
+            reglas.weightx = 0;
+            reglas.fill = GridBagConstraints.HORIZONTAL;
+            reglas.anchor = GridBagConstraints.WEST;
+            reglas.insets = new Insets(5, 0, 5, 10);
+
+            JLabel lbl = new JLabel(etiqueta);
+            lbl.setFont(ETIQUETA);
+            lbl.setForeground(CAFE);
+
+            formulario.add(lbl, reglas);
+
+            reglas.gridx = 1;
+            reglas.gridwidth = 3;
+            reglas.weightx = 1;
+            reglas.insets = new Insets(5, 0, 5, 0);
+
+            formulario.add(componente, reglas);
+
+            reglas.gridwidth = 1;
+        }
+
+        public static BotonRedondeado crearBoton(String texto, Color fondo, Color letra) {
+
+            BotonRedondeado boton = new BotonRedondeado(texto, 20, null);
+            boton.setFont(ETIQUETA);
+            boton.setBackground(fondo);
+            boton.setForeground(letra);
+            boton.setBorder(new EmptyBorder(10, 18, 10, 18));
+
+            Color original = fondo;
+            Color encima = aclarar(fondo);
+
+            boton.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    boton.setBackground(encima);
+                }
+
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    boton.setBackground(original);
+                }
+            });
+
+            return boton;
+        }
+
+        public static BotonRedondeado crearBotonBorde(String texto, Color color) {
+
+            BotonRedondeado boton = new BotonRedondeado(texto, 20, color);
+            boton.setFont(ETIQUETA);
+            boton.setBackground(Color.WHITE);
+            boton.setForeground(color);
+            boton.setBorder(new EmptyBorder(10, 18, 10, 18));
+
+            boton.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    boton.setBackground(BEIGE_CLARO);
+                }
+
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    boton.setBackground(Color.WHITE);
+                }
+            });
+
+            return boton;
+        }
+
+        private static Color aclarar(Color color) {
+            return new Color(
+                    Math.min(color.getRed() + 25, 255),
+                    Math.min(color.getGreen() + 25, 255),
+                    Math.min(color.getBlue() + 25, 255));
+        }
+
+        public static void configurarTabla(JTable tabla) {
+
+            tabla.setFont(PEQUENA);
+            tabla.setForeground(CAFE);
+            tabla.setRowHeight(30);
+            tabla.setGridColor(new Color(236, 231, 223));
+            tabla.setShowVerticalLines(false);
+            tabla.setSelectionBackground(BEIGE);
+            tabla.setSelectionForeground(CAFE_OSCURO);
+            tabla.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            tabla.setAutoCreateRowSorter(false);
+
+            JTableHeader encabezado = tabla.getTableHeader();
+            encabezado.setFont(ETIQUETA);
+            encabezado.setBackground(BEIGE_CLARO);
+            encabezado.setForeground(CAFE);
+            encabezado.setPreferredSize(new Dimension(0, 34));
+            encabezado.setReorderingAllowed(false);
+        }
+
+        public static JScrollPane crearScrollTabla(JTable tabla) {
+
+            JScrollPane scroll = new JScrollPane(tabla);
+            scroll.setBorder(new LineBorder(BORDE, 1, true));
+            scroll.getViewport().setBackground(Color.WHITE);
+
+            return scroll;
+        }
+
+        public static String textoConIcono(String icono, String texto) {
+            return "<html><span style='font-family:" + FUENTE_ICONOS
+                    + "; color:" + aHexadecimal(BRONCE) + "'>" + icono
+                    + "</span>&nbsp;&nbsp;" + texto + "</html>";
+        }
+
+        public static String aHexadecimal(Color color) {
+            return String.format("#%02X%02X%02X",
+                    color.getRed(), color.getGreen(), color.getBlue());
         }
     }
 
+    private static class Habitacion {
 
-//Paneles para la interfaz.
+        public static final String DISPONIBLE = "Disponible";
+        public static final String OCUPADA = "Ocupada";
+        public static final String MANTENIMIENTO = "Mantenimiento";
 
-    public class PanelHuespedes extends JFrame{
+        private int numero;
+        private String tipo;
+        private double precioPorNoche;
+        private int capacidad;
+        private String estado;
+        private boolean aireAcondicionado;
+        private boolean wifi;
+        private boolean television;
+        private boolean cajaFuerte;
+        private String descripcion;
 
-        public PanelHuespedes(){
-
-            setTitle("Modulo de Huesped");
-            setSize(1100, 620);
-            setLocationRelativeTo(null);
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        public Habitacion(int numero, String tipo, double precioPorNoche, int capacidad,
+                          String estado, boolean aireAcondicionado, boolean wifi,
+                          boolean television, boolean cajaFuerte, String descripcion) {
+            this.numero = numero;
+            this.tipo = tipo;
+            this.precioPorNoche = precioPorNoche;
+            this.capacidad = capacidad;
+            this.estado = estado;
+            this.aireAcondicionado = aireAcondicionado;
+            this.wifi = wifi;
+            this.television = television;
+            this.cajaFuerte = cajaFuerte;
+            this.descripcion = descripcion;
         }
 
-        private JPanel crearPanelRedondeado() {
-            JPanel panel = new JPanel();
-            panel.setBackground(Color.WHITE);
-            panel.setBorder(new LineBorder(new Color(218,223,230), 1, true));
+        public int getNumero() {
+            return numero;
+        }
+
+        public void setNumero(int numero) {
+            this.numero = numero;
+        }
+
+        public String getTipo() {
+            return tipo;
+        }
+
+        public void setTipo(String tipo) {
+            this.tipo = tipo;
+        }
+
+        public double getPrecioPorNoche() {
+            return precioPorNoche;
+        }
+
+        public void setPrecioPorNoche(double precioPorNoche) {
+            this.precioPorNoche = precioPorNoche;
+        }
+
+        public int getCapacidad() {
+            return capacidad;
+        }
+
+        public void setCapacidad(int capacidad) {
+            this.capacidad = capacidad;
+        }
+
+        public String getEstado() {
+            return estado;
+        }
+
+        public void setEstado(String estado) {
+            this.estado = estado;
+        }
+
+        public boolean tieneAireAcondicionado() {
+            return aireAcondicionado;
+        }
+
+        public void setAireAcondicionado(boolean aireAcondicionado) {
+            this.aireAcondicionado = aireAcondicionado;
+        }
+
+        public boolean tieneWifi() {
+            return wifi;
+        }
+
+        public void setWifi(boolean wifi) {
+            this.wifi = wifi;
+        }
+
+        public boolean tieneTelevision() {
+            return television;
+        }
+
+        public void setTelevision(boolean television) {
+            this.television = television;
+        }
+
+        public boolean tieneCajaFuerte() {
+            return cajaFuerte;
+        }
+
+        public void setCajaFuerte(boolean cajaFuerte) {
+            this.cajaFuerte = cajaFuerte;
+        }
+
+        public String getDescripcion() {
+            return descripcion;
+        }
+
+        public void setDescripcion(String descripcion) {
+            this.descripcion = descripcion;
+        }
+
+        public boolean estaDisponible() {
+            return DISPONIBLE.equals(estado);
+        }
+
+        public String getAmenidades() {
+
+            String amenidades = "";
+
+            if (aireAcondicionado) {
+                amenidades = amenidades + "A/C  ";
+            }
+
+            if (wifi) {
+                amenidades = amenidades + "Wi-Fi  ";
+            }
+
+            if (television) {
+                amenidades = amenidades + "TV  ";
+            }
+
+            if (cajaFuerte) {
+                amenidades = amenidades + "Caja fuerte";
+            }
+
+            return amenidades.trim().isEmpty() ? "Ninguna" : amenidades.trim();
+        }
+
+        @Override
+        public String toString() {
+            return numero + "  -  " + tipo + "  ($" + String.format("%.2f", precioPorNoche)
+                    + " x noche, hasta " + capacidad + " personas)";
+        }
+    }
+
+    private static class PanelHabitaciones extends JPanel {
+
+        private static final String[] COLUMNAS = {
+                "Numero", "Tipo", "Precio", "Capacidad", "Estado", "Amenidades"
+        };
+
+        private static final String[] TIPOS = {"Standard", "Deluxe", "Suite"};
+
+        private final DashboardSwing ventana;
+
+        private final JTextField txtNumero = EstiloHotel.crearCampoTexto();
+        private final JTextField txtPrecio = EstiloHotel.crearCampoTexto();
+        private final JComboBox<String> cmbTipo = new JComboBox<>(TIPOS);
+        private final JSpinner spCapacidad = new JSpinner(new SpinnerNumberModel(2, 1, 10, 1));
+
+        private final ButtonGroup grupoEstado = new ButtonGroup();
+        private final JRadioButton rbDisponible =
+                EstiloHotel.crearOpcion("Disponible", grupoEstado, true);
+        private final JRadioButton rbOcupada =
+                EstiloHotel.crearOpcion("Ocupada", grupoEstado, false);
+        private final JRadioButton rbMantenimiento =
+                EstiloHotel.crearOpcion("Mantenimiento", grupoEstado, false);
+
+        private final JCheckBox chkAire = EstiloHotel.crearCasilla("A/C");
+        private final JCheckBox chkWifi = EstiloHotel.crearCasilla("Wi-Fi");
+        private final JCheckBox chkTelevision = EstiloHotel.crearCasilla("TV");
+        private final JCheckBox chkCajaFuerte = EstiloHotel.crearCasilla("Caja fuerte");
+
+        private final JTextArea txtDescripcion = new JTextArea();
+
+        private final JTextField txtBuscar = EstiloHotel.crearCampoTexto();
+        private final DefaultTableModel modeloTabla = crearModeloTabla();
+        private final JTable tabla = new JTable(modeloTabla);
+        private final TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modeloTabla);
+
+        private Habitacion habitacionSeleccionada;
+
+        public PanelHabitaciones(DashboardSwing ventana) {
+
+            this.ventana = ventana;
+
+            setLayout(new BorderLayout(20, 0));
+            setBackground(EstiloHotel.FONDO);
+            setBorder(new EmptyBorder(20, 24, 20, 24));
+
+            add(crearTarjetaFormulario(), BorderLayout.WEST);
+            add(crearTarjetaTabla(), BorderLayout.CENTER);
+
+            refrescarTabla();
+        }
+
+        private DefaultTableModel crearModeloTabla() {
+
+            return new DefaultTableModel(COLUMNAS, 0) {
+                @Override
+                public boolean isCellEditable(int fila, int columna) {
+                    return false;
+                }
+            };
+        }
+
+        private JPanel crearTarjetaFormulario() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 16));
+            tarjeta.setPreferredSize(new Dimension(660, 0));
+
+            tarjeta.add(EstiloHotel.crearEncabezado(
+                    "R E G I S T R O",
+                    "Datos de la habitacion"), BorderLayout.NORTH);
+
+            JPanel formulario = new JPanel(new GridBagLayout());
+            formulario.setOpaque(false);
+
+            GridBagConstraints reglas = new GridBagConstraints();
+
+            EstiloHotel.configurarCombo(cmbTipo);
+            EstiloHotel.configurarSpinner(spCapacidad);
+
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 0, "Numero:", txtNumero);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 1, "Precio por noche:", txtPrecio);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 0, "Tipo:", cmbTipo);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 1, "Capacidad:", spCapacidad);
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 2, "Estado:", crearPanelEstado());
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 3, "Amenidades:", crearPanelAmenidades());
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 4, "Descripcion:",
+                    EstiloHotel.crearAreaTexto(txtDescripcion, 3));
+
+            JScrollPane desplazamiento = new JScrollPane(formulario);
+            desplazamiento.setBorder(null);
+            desplazamiento.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            desplazamiento.setOpaque(false);
+            desplazamiento.getViewport().setOpaque(false);
+            desplazamiento.getVerticalScrollBar().setUnitIncrement(16);
+
+            tarjeta.add(desplazamiento, BorderLayout.CENTER);
+            tarjeta.add(crearBotones(), BorderLayout.SOUTH);
+
+            return tarjeta;
+        }
+
+        private JPanel crearPanelEstado() {
+
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            panel.setOpaque(false);
+
+            panel.add(rbDisponible);
+            panel.add(rbOcupada);
+            panel.add(rbMantenimiento);
+
             return panel;
+        }
+
+        private JPanel crearPanelAmenidades() {
+
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            panel.setOpaque(false);
+
+            panel.add(chkAire);
+            panel.add(chkWifi);
+            panel.add(chkTelevision);
+            panel.add(chkCajaFuerte);
+
+            return panel;
+        }
+
+        private JPanel crearBotones() {
+
+            JPanel botones = new JPanel(new GridLayout(1, 5, 8, 0));
+            botones.setOpaque(false);
+
+            JButton btnNuevo = EstiloHotel.crearBoton("Nuevo", EstiloHotel.VERDE, Color.WHITE);
+            JButton btnGuardar = EstiloHotel.crearBoton("Guardar", EstiloHotel.DORADO, Color.WHITE);
+            JButton btnEditar = EstiloHotel.crearBoton("Editar", EstiloHotel.CAFE, Color.WHITE);
+            JButton btnEliminar = EstiloHotel.crearBoton("Eliminar", EstiloHotel.ROJO, Color.WHITE);
+            JButton btnLimpiar = EstiloHotel.crearBotonBorde("Limpiar", EstiloHotel.BRONCE);
+
+            btnNuevo.addActionListener(e -> prepararNueva());
+            btnGuardar.addActionListener(e -> guardarHabitacion());
+            btnEditar.addActionListener(e -> editarHabitacion());
+            btnEliminar.addActionListener(e -> eliminarHabitacion());
+            btnLimpiar.addActionListener(e -> limpiarFormulario());
+
+            botones.add(btnNuevo);
+            botones.add(btnGuardar);
+            botones.add(btnEditar);
+            botones.add(btnEliminar);
+            botones.add(btnLimpiar);
+
+            return botones;
+        }
+
+        private JPanel crearTarjetaTabla() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
+
+            JPanel arriba = new JPanel(new BorderLayout(20, 0));
+            arriba.setOpaque(false);
+
+            arriba.add(EstiloHotel.crearEncabezado(
+                    "H A B I T A C I O N E S",
+                    "Habitaciones registradas"), BorderLayout.CENTER);
+
+            JPanel buscador = new JPanel(new BorderLayout(8, 0));
+            buscador.setOpaque(false);
+            buscador.setPreferredSize(new Dimension(290, 32));
+
+            JLabel lblBuscar = new JLabel("Buscar:");
+            lblBuscar.setFont(EstiloHotel.ETIQUETA);
+            lblBuscar.setForeground(EstiloHotel.CAFE);
+
+            buscador.add(lblBuscar, BorderLayout.WEST);
+            buscador.add(txtBuscar, BorderLayout.CENTER);
+
+            JPanel contenedorBuscador = new JPanel(new BorderLayout());
+            contenedorBuscador.setOpaque(false);
+            contenedorBuscador.add(buscador, BorderLayout.NORTH);
+
+            arriba.add(contenedorBuscador, BorderLayout.EAST);
+
+            tarjeta.add(arriba, BorderLayout.NORTH);
+
+            EstiloHotel.configurarTabla(tabla);
+            tabla.setRowSorter(ordenador);
+            ajustarAnchoColumnas();
+
+            tarjeta.add(EstiloHotel.crearScrollTabla(tabla), BorderLayout.CENTER);
+
+            tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+
+                    if (e.getValueIsAdjusting()) {
+                        return;
+                    }
+
+                    cargarHabitacionSeleccionada();
+                }
+            });
+
+            txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+            });
+
+            return tarjeta;
+        }
+
+        private void ajustarAnchoColumnas() {
+
+            int[] anchos = {70, 90, 90, 80, 110, 220};
+
+            for (int i = 0; i < anchos.length; i++) {
+                tabla.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
+            }
+        }
+
+        private void refrescarTabla() {
+
+            modeloTabla.setRowCount(0);
+
+            for (Habitacion habitacion : DatosHotel.getHabitaciones()) {
+                modeloTabla.addRow(new Object[]{
+                        habitacion.getNumero(),
+                        habitacion.getTipo(),
+                        String.format(Locale.US, "$%,.2f", habitacion.getPrecioPorNoche()),
+                        habitacion.getCapacidad(),
+                        habitacion.getEstado(),
+                        habitacion.getAmenidades()
+                });
+            }
+
+            ventana.actualizarTarjetas();
+        }
+
+        private void filtrarTabla() {
+
+            String texto = txtBuscar.getText().trim();
+
+            if (texto.isEmpty()) {
+                ordenador.setRowFilter(null);
+            } else {
+                ordenador.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
+            }
+        }
+
+        private void prepararNueva() {
+
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Puede registrar una habitacion nueva.",
+                    "Nueva habitacion",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void guardarHabitacion() {
+
+            if (!validarFormulario(null)) {
+                return;
+            }
+
+            Habitacion habitacion = new Habitacion(
+                    Integer.parseInt(txtNumero.getText().trim()),
+                    (String) cmbTipo.getSelectedItem(),
+                    Double.parseDouble(txtPrecio.getText().trim()),
+                    (Integer) spCapacidad.getValue(),
+                    getEstadoSeleccionado(),
+                    chkAire.isSelected(),
+                    chkWifi.isSelected(),
+                    chkTelevision.isSelected(),
+                    chkCajaFuerte.isSelected(),
+                    txtDescripcion.getText().trim());
+
+            DatosHotel.agregarHabitacion(habitacion);
+
+            refrescarTabla();
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Habitacion guardada correctamente.",
+                    "Guardar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void editarHabitacion() {
+
+            if (habitacionSeleccionada == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla la habitacion que desea editar.",
+                        "Editar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!validarFormulario(habitacionSeleccionada)) {
+                return;
+            }
+
+            habitacionSeleccionada.setNumero(Integer.parseInt(txtNumero.getText().trim()));
+            habitacionSeleccionada.setTipo((String) cmbTipo.getSelectedItem());
+            habitacionSeleccionada.setPrecioPorNoche(Double.parseDouble(txtPrecio.getText().trim()));
+            habitacionSeleccionada.setCapacidad((Integer) spCapacidad.getValue());
+            habitacionSeleccionada.setEstado(getEstadoSeleccionado());
+            habitacionSeleccionada.setAireAcondicionado(chkAire.isSelected());
+            habitacionSeleccionada.setWifi(chkWifi.isSelected());
+            habitacionSeleccionada.setTelevision(chkTelevision.isSelected());
+            habitacionSeleccionada.setCajaFuerte(chkCajaFuerte.isSelected());
+            habitacionSeleccionada.setDescripcion(txtDescripcion.getText().trim());
+
+            refrescarTabla();
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Habitacion actualizada correctamente.",
+                    "Editar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void eliminarHabitacion() {
+
+            if (habitacionSeleccionada == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla la habitacion que desea eliminar.",
+                        "Eliminar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (Habitacion.OCUPADA.equals(habitacionSeleccionada.getEstado())) {
+                JOptionPane.showMessageDialog(this,
+                        "No se puede eliminar la habitacion "
+                                + habitacionSeleccionada.getNumero() + " porque esta ocupada.",
+                        "Eliminar",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "Desea eliminar la habitacion "
+                            + habitacionSeleccionada.getNumero() + "?",
+                    "Confirmar eliminacion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (respuesta == JOptionPane.YES_OPTION) {
+
+                DatosHotel.eliminarHabitacion(habitacionSeleccionada);
+
+                refrescarTabla();
+                limpiarFormulario();
+
+                JOptionPane.showMessageDialog(this,
+                        "Habitacion eliminada correctamente.",
+                        "Eliminar",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        private void limpiarFormulario() {
+
+            txtNumero.setText("");
+            txtPrecio.setText("");
+            txtDescripcion.setText("");
+
+            cmbTipo.setSelectedIndex(0);
+            spCapacidad.setValue(2);
+
+            rbDisponible.setSelected(true);
+
+            chkAire.setSelected(false);
+            chkWifi.setSelected(false);
+            chkTelevision.setSelected(false);
+            chkCajaFuerte.setSelected(false);
+
+            habitacionSeleccionada = null;
+
+            tabla.clearSelection();
+            txtNumero.requestFocusInWindow();
+        }
+
+        private void cargarHabitacionSeleccionada() {
+
+            int filaVista = tabla.getSelectedRow();
+
+            if (filaVista == -1) {
+                return;
+            }
+
+            int filaModelo = tabla.convertRowIndexToModel(filaVista);
+
+            habitacionSeleccionada = DatosHotel.getHabitaciones().get(filaModelo);
+
+            txtNumero.setText(String.valueOf(habitacionSeleccionada.getNumero()));
+            txtPrecio.setText(String.format(Locale.US, "%.2f", habitacionSeleccionada.getPrecioPorNoche()));
+            txtDescripcion.setText(habitacionSeleccionada.getDescripcion());
+
+            cmbTipo.setSelectedItem(habitacionSeleccionada.getTipo());
+            spCapacidad.setValue(habitacionSeleccionada.getCapacidad());
+
+            if (Habitacion.OCUPADA.equals(habitacionSeleccionada.getEstado())) {
+                rbOcupada.setSelected(true);
+            } else if (Habitacion.MANTENIMIENTO.equals(habitacionSeleccionada.getEstado())) {
+                rbMantenimiento.setSelected(true);
+            } else {
+                rbDisponible.setSelected(true);
+            }
+
+            chkAire.setSelected(habitacionSeleccionada.tieneAireAcondicionado());
+            chkWifi.setSelected(habitacionSeleccionada.tieneWifi());
+            chkTelevision.setSelected(habitacionSeleccionada.tieneTelevision());
+            chkCajaFuerte.setSelected(habitacionSeleccionada.tieneCajaFuerte());
+        }
+
+        private boolean validarFormulario(Habitacion excepcion) {
+
+            String numero = txtNumero.getText().trim();
+            String precio = txtPrecio.getText().trim();
+
+            if (numero.isEmpty() || precio.isEmpty()) {
+                mostrarAdvertencia("El numero y el precio por noche son obligatorios.");
+                return false;
+            }
+
+            if (!numero.matches("\\d+")) {
+                mostrarAdvertencia("El numero de habitacion solo puede tener digitos.");
+                txtNumero.requestFocusInWindow();
+                return false;
+            }
+
+            if (DatosHotel.existeNumero(Integer.parseInt(numero), excepcion)) {
+                mostrarAdvertencia("Ya existe una habitacion con el numero " + numero + ".");
+                txtNumero.requestFocusInWindow();
+                return false;
+            }
+
+            double valor;
+
+            try {
+                valor = Double.parseDouble(precio);
+            } catch (NumberFormatException e) {
+                mostrarAdvertencia("El precio por noche debe ser un numero.\nEjemplo: 125.50");
+                txtPrecio.requestFocusInWindow();
+                return false;
+            }
+
+            if (valor <= 0) {
+                mostrarAdvertencia("El precio por noche debe ser mayor que cero.");
+                txtPrecio.requestFocusInWindow();
+                return false;
+            }
+
+            if ((Integer) spCapacidad.getValue() <= 0) {
+                mostrarAdvertencia("La capacidad debe ser mayor que cero.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private String getEstadoSeleccionado() {
+
+            if (rbOcupada.isSelected()) {
+                return Habitacion.OCUPADA;
+            }
+
+            if (rbMantenimiento.isSelected()) {
+                return Habitacion.MANTENIMIENTO;
+            }
+
+            return Habitacion.DISPONIBLE;
+        }
+
+        private void mostrarAdvertencia(String mensaje) {
+            JOptionPane.showMessageDialog(this, mensaje, "Validacion", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    // Parte de Luis
+
+    private static class Huesped {
+
+        private String identificacion;
+        private String nombre;
+        private String apellidos;
+        private String telefono;
+        private String correo;
+        private String nacionalidad;
+        private String observaciones;
+
+        public Huesped(String identificacion, String nombre, String apellidos, String telefono,
+                       String correo, String nacionalidad, String observaciones) {
+            this.identificacion = identificacion;
+            this.nombre = nombre;
+            this.apellidos = apellidos;
+            this.telefono = telefono;
+            this.correo = correo;
+            this.nacionalidad = nacionalidad;
+            this.observaciones = observaciones;
+        }
+
+        public String getIdentificacion() {
+            return identificacion;
+        }
+
+        public void setIdentificacion(String identificacion) {
+            this.identificacion = identificacion;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public String getApellidos() {
+            return apellidos;
+        }
+
+        public void setApellidos(String apellidos) {
+            this.apellidos = apellidos;
+        }
+
+        public String getTelefono() {
+            return telefono;
+        }
+
+        public void setTelefono(String telefono) {
+            this.telefono = telefono;
+        }
+
+        public String getCorreo() {
+            return correo;
+        }
+
+        public void setCorreo(String correo) {
+            this.correo = correo;
+        }
+
+        public String getNacionalidad() {
+            return nacionalidad;
+        }
+
+        public void setNacionalidad(String nacionalidad) {
+            this.nacionalidad = nacionalidad;
+        }
+
+        public String getObservaciones() {
+            return observaciones;
+        }
+
+        public void setObservaciones(String observaciones) {
+            this.observaciones = observaciones;
+        }
+
+        public String getNombreCompleto() {
+            return nombre + " " + apellidos;
+        }
+
+        @Override
+        public String toString() {
+            return identificacion + "  -  " + getNombreCompleto();
+        }
+    }
+
+    private static class Reservacion {
+
+        public static final String ACTIVA = "Activa";
+        public static final String CANCELADA = "Cancelada";
+        public static final String FINALIZADA = "Finalizada";
+
+        public static final double PRECIO_DESAYUNO = 15.0;
+        public static final double PRECIO_PARQUEO = 10.0;
+        public static final double PRECIO_SPA = 40.0;
+
+        private static final DateTimeFormatter FORMATO_FECHA =
+                DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        private int numero;
+        private Huesped huesped;
+        private Habitacion habitacion;
+        private LocalDate fechaEntrada;
+        private LocalDate fechaSalida;
+        private int adultos;
+        private int ninos;
+        private int cantidadHabitaciones;
+        private String estado;
+        private boolean desayuno;
+        private boolean parqueo;
+        private boolean spa;
+
+        public Reservacion(int numero, Huesped huesped, Habitacion habitacion,
+                           LocalDate fechaEntrada, LocalDate fechaSalida,
+                           int adultos, int ninos, int cantidadHabitaciones,
+                           String estado, boolean desayuno, boolean parqueo, boolean spa) {
+            this.numero = numero;
+            this.huesped = huesped;
+            this.habitacion = habitacion;
+            this.fechaEntrada = fechaEntrada;
+            this.fechaSalida = fechaSalida;
+            this.adultos = adultos;
+            this.ninos = ninos;
+            this.cantidadHabitaciones = cantidadHabitaciones;
+            this.estado = estado;
+            this.desayuno = desayuno;
+            this.parqueo = parqueo;
+            this.spa = spa;
+        }
+
+        public int getNumero() {
+            return numero;
+        }
+
+        public Huesped getHuesped() {
+            return huesped;
+        }
+
+        public void setHuesped(Huesped huesped) {
+            this.huesped = huesped;
+        }
+
+        public Habitacion getHabitacion() {
+            return habitacion;
+        }
+
+        public void setHabitacion(Habitacion habitacion) {
+            this.habitacion = habitacion;
+        }
+
+        public LocalDate getFechaEntrada() {
+            return fechaEntrada;
+        }
+
+        public void setFechaEntrada(LocalDate fechaEntrada) {
+            this.fechaEntrada = fechaEntrada;
+        }
+
+        public LocalDate getFechaSalida() {
+            return fechaSalida;
+        }
+
+        public void setFechaSalida(LocalDate fechaSalida) {
+            this.fechaSalida = fechaSalida;
+        }
+
+        public int getAdultos() {
+            return adultos;
+        }
+
+        public void setAdultos(int adultos) {
+            this.adultos = adultos;
+        }
+
+        public int getNinos() {
+            return ninos;
+        }
+
+        public void setNinos(int ninos) {
+            this.ninos = ninos;
+        }
+
+        public int getCantidadHabitaciones() {
+            return cantidadHabitaciones;
+        }
+
+        public void setCantidadHabitaciones(int cantidadHabitaciones) {
+            this.cantidadHabitaciones = cantidadHabitaciones;
+        }
+
+        public String getEstado() {
+            return estado;
+        }
+
+        public void setEstado(String estado) {
+            this.estado = estado;
+        }
+
+        public boolean tieneDesayuno() {
+            return desayuno;
+        }
+
+        public void setDesayuno(boolean desayuno) {
+            this.desayuno = desayuno;
+        }
+
+        public boolean tieneParqueo() {
+            return parqueo;
+        }
+
+        public void setParqueo(boolean parqueo) {
+            this.parqueo = parqueo;
+        }
+
+        public boolean tieneSpa() {
+            return spa;
+        }
+
+        public void setSpa(boolean spa) {
+            this.spa = spa;
+        }
+
+        public int getNoches() {
+            return (int) ChronoUnit.DAYS.between(fechaEntrada, fechaSalida);
+        }
+
+        public int getTotalPersonas() {
+            return adultos + ninos;
+        }
+
+        public double getTotal() {
+            return calcularTotal(habitacion, getNoches(), cantidadHabitaciones,
+                    desayuno, parqueo, spa);
+        }
+
+        public static double calcularTotal(Habitacion habitacion, int noches, int cantidadHabitaciones,
+                                           boolean desayuno, boolean parqueo, boolean spa) {
+
+            if (habitacion == null || noches <= 0) {
+                return 0;
+            }
+
+            double total = habitacion.getPrecioPorNoche() * noches * cantidadHabitaciones;
+
+            if (desayuno) {
+                total = total + PRECIO_DESAYUNO * noches;
+            }
+
+            if (parqueo) {
+                total = total + PRECIO_PARQUEO * noches;
+            }
+
+            if (spa) {
+                total = total + PRECIO_SPA;
+            }
+
+            return total;
+        }
+
+        public String getServicios() {
+
+            String servicios = "";
+
+            if (desayuno) {
+                servicios = servicios + "Desayuno ";
+            }
+
+            if (parqueo) {
+                servicios = servicios + "Parqueo ";
+            }
+
+            if (spa) {
+                servicios = servicios + "Spa";
+            }
+
+            return servicios.trim().isEmpty() ? "Ninguno" : servicios.trim();
+        }
+
+        public String getFechaEntradaTexto() {
+            return fechaEntrada.format(FORMATO_FECHA);
+        }
+
+        public String getFechaSalidaTexto() {
+            return fechaSalida.format(FORMATO_FECHA);
+        }
+
+        public boolean estaActiva() {
+            return ACTIVA.equals(estado);
+        }
+    }
+
+    private static class DatosHotel {
+
+        private static final List<Habitacion> HABITACIONES = new ArrayList<>();
+        private static final List<Huesped> HUESPEDES = new ArrayList<>();
+        private static final List<Reservacion> RESERVACIONES = new ArrayList<>();
+
+        private static int siguienteNumeroReservacion = 1;
+
+        static {
+            cargarDatosDeEjemplo();
+        }
+
+        private DatosHotel() {
+        }
+
+        private static void cargarDatosDeEjemplo() {
+
+            HABITACIONES.add(new Habitacion(101, "Standard", 85, 2, Habitacion.DISPONIBLE,
+                    true, true, true, false, "Habitacion con vista al jardin."));
+            HABITACIONES.add(new Habitacion(102, "Standard", 85, 2, Habitacion.DISPONIBLE,
+                    true, true, true, false, "Habitacion con vista al jardin."));
+            HABITACIONES.add(new Habitacion(103, "Standard", 90, 3, Habitacion.DISPONIBLE,
+                    true, true, true, true, "Habitacion familiar con cama extra."));
+            HABITACIONES.add(new Habitacion(201, "Deluxe", 130, 3, Habitacion.DISPONIBLE,
+                    true, true, true, true, "Balcon privado con vista al volcan."));
+            HABITACIONES.add(new Habitacion(202, "Deluxe", 130, 3, Habitacion.MANTENIMIENTO,
+                    true, true, true, true, "En reparacion del aire acondicionado."));
+            HABITACIONES.add(new Habitacion(203, "Deluxe", 145, 4, Habitacion.DISPONIBLE,
+                    true, true, true, true, "Balcon privado y bano con tina."));
+            HABITACIONES.add(new Habitacion(301, "Suite", 210, 4, Habitacion.DISPONIBLE,
+                    true, true, true, true, "Suite con sala independiente."));
+            HABITACIONES.add(new Habitacion(302, "Suite", 260, 6, Habitacion.DISPONIBLE,
+                    true, true, true, true, "Suite presidencial con jacuzzi."));
+
+            HUESPEDES.add(new Huesped("112340567", "Ana Lucia", "Soto Ramirez", "88881234",
+                    "ana.soto@gmail.com", "Costa Rica", "Prefiere habitacion con vista al volcan."));
+            HUESPEDES.add(new Huesped("205670890", "Carlos", "Lopez Ruiz", "87654321",
+                    "carlos.lopez@gmail.com", "Nicaragua", ""));
+            HUESPEDES.add(new Huesped("400123456", "Maria", "Garcia Perez", "83001122",
+                    "maria.garcia@hotmail.com", "Estados Unidos", "Llega en vuelo nocturno."));
+
+            Reservacion reservacion = new Reservacion(
+                    siguienteNumeroReservacion,
+                    HUESPEDES.get(0),
+                    buscarHabitacion(102),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(3),
+                    2, 0, 1,
+                    Reservacion.ACTIVA,
+                    true, false, false);
+
+            siguienteNumeroReservacion++;
+
+            RESERVACIONES.add(reservacion);
+            buscarHabitacion(102).setEstado(Habitacion.OCUPADA);
+        }
+
+        public static List<Habitacion> getHabitaciones() {
+            return HABITACIONES;
+        }
+
+        public static Habitacion buscarHabitacion(int numero) {
+
+            for (Habitacion habitacion : HABITACIONES) {
+                if (habitacion.getNumero() == numero) {
+                    return habitacion;
+                }
+            }
+
+            return null;
+        }
+
+        public static List<Habitacion> getHabitacionesDisponibles(String tipo, Habitacion incluirEsta) {
+
+            List<Habitacion> disponibles = new ArrayList<>();
+
+            for (Habitacion habitacion : HABITACIONES) {
+
+                boolean sirveElTipo = "Todos".equals(tipo) || habitacion.getTipo().equals(tipo);
+                boolean sePuedeUsar = habitacion.estaDisponible() || habitacion == incluirEsta;
+
+                if (sirveElTipo && sePuedeUsar) {
+                    disponibles.add(habitacion);
+                }
+            }
+
+            return disponibles;
+        }
+
+        public static void agregarHabitacion(Habitacion habitacion) {
+            HABITACIONES.add(habitacion);
+        }
+
+        public static void eliminarHabitacion(Habitacion habitacion) {
+            HABITACIONES.remove(habitacion);
+        }
+
+        public static boolean existeNumero(int numero, Habitacion excepcion) {
+
+            for (Habitacion habitacion : HABITACIONES) {
+                if (habitacion != excepcion && habitacion.getNumero() == numero) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static int contarHabitaciones(String estado) {
+
+            int cantidad = 0;
+
+            for (Habitacion habitacion : HABITACIONES) {
+                if (habitacion.getEstado().equals(estado)) {
+                    cantidad++;
+                }
+            }
+
+            return cantidad;
+        }
+
+        public static List<Huesped> getHuespedes() {
+            return HUESPEDES;
+        }
+
+        public static void agregarHuesped(Huesped huesped) {
+            HUESPEDES.add(huesped);
+        }
+
+        public static void eliminarHuesped(Huesped huesped) {
+            HUESPEDES.remove(huesped);
+        }
+
+        public static boolean existeIdentificacion(String identificacion, Huesped excepcion) {
+
+            for (Huesped huesped : HUESPEDES) {
+                if (huesped != excepcion && huesped.getIdentificacion().equals(identificacion)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static List<Reservacion> getReservaciones() {
+            return RESERVACIONES;
+        }
+
+        public static void agregarReservacion(Reservacion reservacion) {
+            RESERVACIONES.add(reservacion);
+        }
+
+        public static void eliminarReservacion(Reservacion reservacion) {
+            RESERVACIONES.remove(reservacion);
+        }
+
+        public static int tomarNumeroReservacion() {
+            int numero = siguienteNumeroReservacion;
+            siguienteNumeroReservacion++;
+            return numero;
+        }
+
+        public static int contarReservaciones(String estado) {
+
+            int cantidad = 0;
+
+            for (Reservacion reservacion : RESERVACIONES) {
+                if (reservacion.getEstado().equals(estado)) {
+                    cantidad++;
+                }
+            }
+
+            return cantidad;
+        }
+
+        public static boolean tieneReservacionesActivas(Huesped huesped) {
+
+            for (Reservacion reservacion : RESERVACIONES) {
+                if (reservacion.getHuesped() == huesped && reservacion.estaActiva()) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static double calcularIngresos() {
+
+            double ingresos = 0;
+
+            for (Reservacion reservacion : RESERVACIONES) {
+                if (!Reservacion.CANCELADA.equals(reservacion.getEstado())) {
+                    ingresos = ingresos + reservacion.getTotal();
+                }
+            }
+
+            return ingresos;
+        }
+    }
+
+    private static class PanelHuespedes extends JPanel {
+
+        private static final String[] COLUMNAS = {
+                "Identificacion", "Nombre completo", "Telefono", "Correo", "Nacionalidad"
+        };
+
+        private static final String[] NACIONALIDADES = {
+                "Costa Rica", "Nicaragua", "Panama", "Honduras", "Guatemala",
+                "Mexico", "Estados Unidos", "Canada", "Espana", "Otra"
+        };
+
+        private static final String PATRON_CORREO = "^[\\w.+-]+@[\\w-]+\\.[A-Za-z]{2,}$";
+
+        private final JTextField txtIdentificacion = EstiloHotel.crearCampoTexto();
+        private final JTextField txtNombre = EstiloHotel.crearCampoTexto();
+        private final JTextField txtApellidos = EstiloHotel.crearCampoTexto();
+        private final JTextField txtTelefono = EstiloHotel.crearCampoTexto();
+        private final JTextField txtCorreo = EstiloHotel.crearCampoTexto();
+        private final JComboBox<String> cmbNacionalidad = new JComboBox<>(NACIONALIDADES);
+        private final JTextArea txtObservaciones = new JTextArea();
+
+        private final JTextField txtBuscar = EstiloHotel.crearCampoTexto();
+        private final DefaultTableModel modeloTabla = crearModeloTabla();
+        private final JTable tabla = new JTable(modeloTabla);
+        private final TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modeloTabla);
+
+        private Huesped huespedSeleccionado;
+
+        public PanelHuespedes() {
+
+            setLayout(new BorderLayout(20, 0));
+            setBackground(EstiloHotel.FONDO);
+            setBorder(new EmptyBorder(20, 24, 20, 24));
+
+            add(crearTarjetaFormulario(), BorderLayout.WEST);
+            add(crearTarjetaTabla(), BorderLayout.CENTER);
+
+            refrescarTabla();
+        }
+
+        private DefaultTableModel crearModeloTabla() {
+
+            return new DefaultTableModel(COLUMNAS, 0) {
+                @Override
+                public boolean isCellEditable(int fila, int columna) {
+                    return false;
+                }
+            };
+        }
+
+        private JPanel crearTarjetaFormulario() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 16));
+            tarjeta.setPreferredSize(new Dimension(620, 0));
+
+            tarjeta.add(EstiloHotel.crearEncabezadoCompacto(
+                    "R E G I S T R O",
+                    "Datos del huesped"), BorderLayout.NORTH);
+
+            JPanel formulario = new JPanel(new GridBagLayout());
+            formulario.setOpaque(false);
+
+            GridBagConstraints reglas = new GridBagConstraints();
+
+            EstiloHotel.configurarCombo(cmbNacionalidad);
+
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 0, "Identificacion:", txtIdentificacion);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 1, "Telefono:", txtTelefono);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 0, "Nombre:", txtNombre);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 1, "Correo:", txtCorreo);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 0, "Apellidos:", txtApellidos);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 1, "Nacionalidad:", cmbNacionalidad);
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 3, "Observaciones:",
+                    EstiloHotel.crearAreaTexto(txtObservaciones, 3));
+
+            JScrollPane desplazamiento = new JScrollPane(formulario);
+            desplazamiento.setBorder(null);
+            desplazamiento.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            desplazamiento.setOpaque(false);
+            desplazamiento.getViewport().setOpaque(false);
+            desplazamiento.getVerticalScrollBar().setUnitIncrement(16);
+
+            tarjeta.add(desplazamiento, BorderLayout.CENTER);
+            tarjeta.add(crearBotones(), BorderLayout.SOUTH);
+
+            return tarjeta;
+        }
+
+        private JPanel crearBotones() {
+
+            JPanel botones = new JPanel(new GridLayout(1, 5, 8, 0));
+            botones.setOpaque(false);
+
+            JButton btnNuevo = EstiloHotel.crearBoton("Nuevo", EstiloHotel.VERDE, Color.WHITE);
+            JButton btnGuardar = EstiloHotel.crearBoton("Guardar", EstiloHotel.DORADO, Color.WHITE);
+            JButton btnEditar = EstiloHotel.crearBoton("Editar", EstiloHotel.CAFE, Color.WHITE);
+            JButton btnEliminar = EstiloHotel.crearBoton("Eliminar", EstiloHotel.ROJO, Color.WHITE);
+            JButton btnLimpiar = EstiloHotel.crearBotonBorde("Limpiar", EstiloHotel.BRONCE);
+
+            btnNuevo.addActionListener(e -> prepararNuevo());
+            btnGuardar.addActionListener(e -> guardarHuesped());
+            btnEditar.addActionListener(e -> editarHuesped());
+            btnEliminar.addActionListener(e -> eliminarHuesped());
+            btnLimpiar.addActionListener(e -> limpiarFormulario());
+
+            botones.add(btnNuevo);
+            botones.add(btnGuardar);
+            botones.add(btnEditar);
+            botones.add(btnEliminar);
+            botones.add(btnLimpiar);
+
+            return botones;
+        }
+
+        private JPanel crearTarjetaTabla() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
+
+            JPanel arriba = new JPanel(new BorderLayout(20, 0));
+            arriba.setOpaque(false);
+
+            arriba.add(EstiloHotel.crearEncabezado(
+                    "H U E S P E D E S",
+                    "Huespedes registrados",
+                    "Seleccione una fila para cargar sus datos en el formulario."),
+                    BorderLayout.CENTER);
+
+            JPanel buscador = new JPanel(new BorderLayout(8, 0));
+            buscador.setOpaque(false);
+            buscador.setPreferredSize(new Dimension(300, 32));
+
+            JLabel lblBuscar = new JLabel("Buscar:");
+            lblBuscar.setFont(EstiloHotel.ETIQUETA);
+            lblBuscar.setForeground(EstiloHotel.CAFE);
+
+            buscador.add(lblBuscar, BorderLayout.WEST);
+            buscador.add(txtBuscar, BorderLayout.CENTER);
+
+            JPanel contenedorBuscador = new JPanel(new BorderLayout());
+            contenedorBuscador.setOpaque(false);
+            contenedorBuscador.add(buscador, BorderLayout.NORTH);
+
+            arriba.add(contenedorBuscador, BorderLayout.EAST);
+
+            tarjeta.add(arriba, BorderLayout.NORTH);
+
+            EstiloHotel.configurarTabla(tabla);
+            tabla.setRowSorter(ordenador);
+
+            tarjeta.add(EstiloHotel.crearScrollTabla(tabla), BorderLayout.CENTER);
+
+            tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+
+                    if (e.getValueIsAdjusting()) {
+                        return;
+                    }
+
+                    cargarHuespedSeleccionado();
+                }
+            });
+
+            txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    filtrarTabla();
+                }
+            });
+
+            return tarjeta;
+        }
+
+        private void refrescarTabla() {
+
+            modeloTabla.setRowCount(0);
+
+            for (Huesped huesped : DatosHotel.getHuespedes()) {
+                modeloTabla.addRow(new Object[]{
+                        huesped.getIdentificacion(),
+                        huesped.getNombreCompleto(),
+                        huesped.getTelefono(),
+                        huesped.getCorreo(),
+                        huesped.getNacionalidad()
+                });
+            }
+        }
+
+        private void filtrarTabla() {
+
+            String texto = txtBuscar.getText().trim();
+
+            if (texto.isEmpty()) {
+                ordenador.setRowFilter(null);
+            } else {
+                ordenador.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
+            }
+        }
+
+        private void prepararNuevo() {
+
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Puede registrar un huesped nuevo.",
+                    "Nuevo huesped",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void guardarHuesped() {
+
+            if (!validarFormulario(null)) {
+                return;
+            }
+
+            Huesped huesped = new Huesped(
+                    txtIdentificacion.getText().trim(),
+                    txtNombre.getText().trim(),
+                    txtApellidos.getText().trim(),
+                    txtTelefono.getText().trim(),
+                    txtCorreo.getText().trim(),
+                    (String) cmbNacionalidad.getSelectedItem(),
+                    txtObservaciones.getText().trim());
+
+            DatosHotel.agregarHuesped(huesped);
+
+            refrescarTabla();
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Huesped guardado correctamente.",
+                    "Guardar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void editarHuesped() {
+
+            if (huespedSeleccionado == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla el huesped que desea editar.",
+                        "Editar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!validarFormulario(huespedSeleccionado)) {
+                return;
+            }
+
+            huespedSeleccionado.setIdentificacion(txtIdentificacion.getText().trim());
+            huespedSeleccionado.setNombre(txtNombre.getText().trim());
+            huespedSeleccionado.setApellidos(txtApellidos.getText().trim());
+            huespedSeleccionado.setTelefono(txtTelefono.getText().trim());
+            huespedSeleccionado.setCorreo(txtCorreo.getText().trim());
+            huespedSeleccionado.setNacionalidad((String) cmbNacionalidad.getSelectedItem());
+            huespedSeleccionado.setObservaciones(txtObservaciones.getText().trim());
+
+            refrescarTabla();
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Huesped actualizado correctamente.",
+                    "Editar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void eliminarHuesped() {
+
+            if (huespedSeleccionado == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla el huesped que desea eliminar.",
+                        "Eliminar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (DatosHotel.tieneReservacionesActivas(huespedSeleccionado)) {
+                JOptionPane.showMessageDialog(this,
+                        "No se puede eliminar el huesped porque tiene reservaciones activas.\n"
+                                + "Primero cancele o finalice esas reservaciones.",
+                        "Eliminar",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "Desea eliminar al huesped " + huespedSeleccionado.getNombreCompleto() + "?",
+                    "Confirmar eliminacion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (respuesta == JOptionPane.YES_OPTION) {
+
+                DatosHotel.eliminarHuesped(huespedSeleccionado);
+
+                refrescarTabla();
+                limpiarFormulario();
+
+                JOptionPane.showMessageDialog(this,
+                        "Huesped eliminado correctamente.",
+                        "Eliminar",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        private void limpiarFormulario() {
+
+            txtIdentificacion.setText("");
+            txtNombre.setText("");
+            txtApellidos.setText("");
+            txtTelefono.setText("");
+            txtCorreo.setText("");
+            txtObservaciones.setText("");
+            cmbNacionalidad.setSelectedIndex(0);
+
+            huespedSeleccionado = null;
+
+            tabla.clearSelection();
+            txtIdentificacion.requestFocusInWindow();
+        }
+
+        private void cargarHuespedSeleccionado() {
+
+            int filaVista = tabla.getSelectedRow();
+
+            if (filaVista == -1) {
+                return;
+            }
+
+            int filaModelo = tabla.convertRowIndexToModel(filaVista);
+
+            huespedSeleccionado = DatosHotel.getHuespedes().get(filaModelo);
+
+            txtIdentificacion.setText(huespedSeleccionado.getIdentificacion());
+            txtNombre.setText(huespedSeleccionado.getNombre());
+            txtApellidos.setText(huespedSeleccionado.getApellidos());
+            txtTelefono.setText(huespedSeleccionado.getTelefono());
+            txtCorreo.setText(huespedSeleccionado.getCorreo());
+            txtObservaciones.setText(huespedSeleccionado.getObservaciones());
+            cmbNacionalidad.setSelectedItem(huespedSeleccionado.getNacionalidad());
+        }
+
+        private boolean validarFormulario(Huesped excepcion) {
+
+            String identificacion = txtIdentificacion.getText().trim();
+            String nombre = txtNombre.getText().trim();
+            String apellidos = txtApellidos.getText().trim();
+            String telefono = txtTelefono.getText().trim();
+            String correo = txtCorreo.getText().trim();
+
+            if (identificacion.isEmpty() || nombre.isEmpty() || apellidos.isEmpty()
+                    || telefono.isEmpty() || correo.isEmpty()) {
+
+                mostrarAdvertencia("Identificacion, nombre, apellidos, telefono y correo "
+                        + "son obligatorios.");
+                return false;
+            }
+
+            if (!identificacion.matches("\\d+")) {
+                mostrarAdvertencia("La identificacion solo puede tener numeros.");
+                txtIdentificacion.requestFocusInWindow();
+                return false;
+            }
+
+            if (DatosHotel.existeIdentificacion(identificacion, excepcion)) {
+                mostrarAdvertencia("Ya existe un huesped registrado con la identificacion "
+                        + identificacion + ".");
+                txtIdentificacion.requestFocusInWindow();
+                return false;
+            }
+
+            if (!telefono.matches("\\d{8}")) {
+                mostrarAdvertencia("El telefono debe tener exactamente 8 digitos.");
+                txtTelefono.requestFocusInWindow();
+                return false;
+            }
+
+            if (!correo.matches(PATRON_CORREO)) {
+                mostrarAdvertencia("El correo no tiene un formato valido.\n"
+                        + "Ejemplo: nombre@correo.com");
+                txtCorreo.requestFocusInWindow();
+                return false;
+            }
+
+            return true;
+        }
+
+        private void mostrarAdvertencia(String mensaje) {
+            JOptionPane.showMessageDialog(this, mensaje, "Validacion", JOptionPane.WARNING_MESSAGE);
+        }
+    }
+
+    private static class PanelReservaciones extends JPanel {
+
+        private static final String[] COLUMNAS = {
+                "#", "Huesped", "Hab.", "Tipo", "Entrada", "Salida",
+                "Noches", "Pers.", "Estado", "Total"
+        };
+
+        private static final int COLUMNA_TIPO = 3;
+        private static final int COLUMNA_ESTADO = 8;
+
+        private static final String[] TIPOS = {"Todos", "Standard", "Deluxe", "Suite"};
+        private static final String[] ESTADOS = {"Todos", "Activa", "Cancelada", "Finalizada"};
+
+        private final JComboBox<Huesped> cmbHuesped = new JComboBox<>();
+        private final JComboBox<String> cmbTipo = new JComboBox<>(TIPOS);
+        private final JComboBox<Habitacion> cmbHabitacion = new JComboBox<>();
+        private final JSpinner spCantidadHabitaciones =
+                new JSpinner(new SpinnerNumberModel(1, 1, 5, 1));
+        private final JSpinner spFechaEntrada = new JSpinner(new SpinnerDateModel());
+        private final JSpinner spFechaSalida = new JSpinner(new SpinnerDateModel());
+        private final JSpinner spAdultos = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
+        private final JSpinner spNinos = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
+
+        private final ButtonGroup grupoEstado = new ButtonGroup();
+        private final JRadioButton rbActiva =
+                EstiloHotel.crearOpcion("Activa", grupoEstado, true);
+        private final JRadioButton rbCancelada =
+                EstiloHotel.crearOpcion("Cancelada", grupoEstado, false);
+        private final JRadioButton rbFinalizada =
+                EstiloHotel.crearOpcion("Finalizada", grupoEstado, false);
+
+        private final JCheckBox chkDesayuno = EstiloHotel.crearCasilla("Desayuno");
+        private final JCheckBox chkParqueo = EstiloHotel.crearCasilla("Parqueo");
+        private final JCheckBox chkSpa = EstiloHotel.crearCasilla("Spa");
+
+        private final JLabel lblTotal = new JLabel("$0.00");
+        private final JLabel lblDetalleTotal = new JLabel("Seleccione fechas y habitacion");
+
+        private final JTextField txtBuscar = EstiloHotel.crearCampoTexto();
+        private final JComboBox<String> cmbFiltroEstado = new JComboBox<>(ESTADOS);
+        private final JComboBox<String> cmbFiltroTipo = new JComboBox<>(TIPOS);
+        private final DefaultTableModel modeloTabla = crearModeloTabla();
+        private final JTable tabla = new JTable(modeloTabla);
+        private final TableRowSorter<DefaultTableModel> ordenador = new TableRowSorter<>(modeloTabla);
+
+        private Reservacion reservacionSeleccionada;
+
+        private boolean cargandoDatos;
+
+        public PanelReservaciones() {
+
+            setLayout(new BorderLayout(20, 0));
+            setBackground(EstiloHotel.FONDO);
+            setBorder(new EmptyBorder(20, 24, 20, 24));
+
+            configurarComponentes();
+
+            add(crearTarjetaFormulario(), BorderLayout.WEST);
+            add(crearTarjetaTabla(), BorderLayout.CENTER);
+
+            actualizarListas();
+        }
+
+        private DefaultTableModel crearModeloTabla() {
+
+            return new DefaultTableModel(COLUMNAS, 0) {
+                @Override
+                public boolean isCellEditable(int fila, int columna) {
+                    return false;
+                }
+            };
+        }
+
+        private void configurarComponentes() {
+
+            EstiloHotel.configurarCombo(cmbHuesped);
+            EstiloHotel.configurarCombo(cmbTipo);
+            EstiloHotel.configurarCombo(cmbHabitacion);
+            EstiloHotel.configurarCombo(cmbFiltroEstado);
+            EstiloHotel.configurarCombo(cmbFiltroTipo);
+
+            spFechaEntrada.setEditor(new JSpinner.DateEditor(spFechaEntrada, "dd/MM/yyyy"));
+            spFechaSalida.setEditor(new JSpinner.DateEditor(spFechaSalida, "dd/MM/yyyy"));
+
+            spFechaEntrada.setValue(aDate(LocalDate.now()));
+            spFechaSalida.setValue(aDate(LocalDate.now().plusDays(1)));
+
+            EstiloHotel.configurarSpinner(spFechaEntrada);
+            EstiloHotel.configurarSpinner(spFechaSalida);
+            EstiloHotel.configurarSpinner(spAdultos);
+            EstiloHotel.configurarSpinner(spNinos);
+            EstiloHotel.configurarSpinner(spCantidadHabitaciones);
+
+            ChangeListener recalcular = new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    actualizarTotal();
+                }
+            };
+
+            spFechaEntrada.addChangeListener(recalcular);
+            spFechaSalida.addChangeListener(recalcular);
+            spCantidadHabitaciones.addChangeListener(recalcular);
+            spAdultos.addChangeListener(recalcular);
+            spNinos.addChangeListener(recalcular);
+
+            chkDesayuno.addActionListener(e -> actualizarTotal());
+            chkParqueo.addActionListener(e -> actualizarTotal());
+            chkSpa.addActionListener(e -> actualizarTotal());
+
+            cmbTipo.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+
+                    if (e.getStateChange() == ItemEvent.SELECTED && !cargandoDatos) {
+                        recargarHabitaciones();
+                    }
+                }
+            });
+
+            cmbHabitacion.addActionListener(e -> {
+                if (!cargandoDatos) {
+                    actualizarTotal();
+                }
+            });
+
+            lblTotal.setFont(EstiloHotel.TOTAL);
+            lblTotal.setForeground(EstiloHotel.BRONCE);
+
+            lblDetalleTotal.setFont(EstiloHotel.PEQUENA);
+            lblDetalleTotal.setForeground(EstiloHotel.TEXTO_SUAVE);
+        }
+
+        private JPanel crearTarjetaFormulario() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
+            tarjeta.setPreferredSize(new Dimension(700, 0));
+
+            tarjeta.add(EstiloHotel.crearEncabezadoCompacto(
+                    "R E S E R V A R",
+                    "Datos de la reservacion"), BorderLayout.NORTH);
+
+            JPanel formulario = new JPanel(new GridBagLayout());
+            formulario.setOpaque(false);
+
+            GridBagConstraints reglas = new GridBagConstraints();
+
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 0, "Huesped:", cmbHuesped);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 0, 1, "Fecha de entrada:", spFechaEntrada);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 0, "Tipo de habitacion:", cmbTipo);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 1, 1, "Fecha de salida:", spFechaSalida);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 0, "Habitacion:", cmbHabitacion);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 2, 1, "Adultos:", spAdultos);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 3, 0, "Cantidad:", spCantidadHabitaciones);
+            EstiloHotel.agregarFilaFormulario(formulario, reglas, 3, 1, "Ninos:", spNinos);
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 4, "Estado:", crearPanelEstado());
+            EstiloHotel.agregarFilaAncha(formulario, reglas, 5, "Servicios:", crearPanelServicios());
+
+            JPanel contenido = new JPanel(new BorderLayout(0, 12));
+            contenido.setOpaque(false);
+            contenido.add(formulario, BorderLayout.NORTH);
+            contenido.add(crearPanelTotal(), BorderLayout.CENTER);
+
+            JScrollPane desplazamiento = new JScrollPane(contenido);
+            desplazamiento.setBorder(null);
+            desplazamiento.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            desplazamiento.setOpaque(false);
+            desplazamiento.getViewport().setOpaque(false);
+            desplazamiento.getVerticalScrollBar().setUnitIncrement(16);
+
+            tarjeta.add(desplazamiento, BorderLayout.CENTER);
+            tarjeta.add(crearBotones(), BorderLayout.SOUTH);
+
+            return tarjeta;
+        }
+
+        private JPanel crearPanelEstado() {
+
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            panel.setOpaque(false);
+
+            panel.add(rbActiva);
+            panel.add(rbCancelada);
+            panel.add(rbFinalizada);
+
+            return panel;
+        }
+
+        private JPanel crearPanelServicios() {
+
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            panel.setOpaque(false);
+
+            panel.add(chkDesayuno);
+            panel.add(chkParqueo);
+            panel.add(chkSpa);
+
+            return panel;
+        }
+
+        private JPanel crearPanelTotal() {
+
+            PanelRedondeado panel = new PanelRedondeado(
+                    new BorderLayout(0, 4), EstiloHotel.BEIGE_CLARO, EstiloHotel.BORDE, 10);
+            panel.setBorder(new EmptyBorder(14, 18, 14, 18));
+
+            JLabel titulo = new JLabel("TOTAL A PAGAR");
+            titulo.setFont(EstiloHotel.MINI);
+            titulo.setForeground(EstiloHotel.TEXTO_SUAVE);
+
+            JPanel superior = new JPanel(new BorderLayout());
+            superior.setOpaque(false);
+            superior.add(titulo, BorderLayout.NORTH);
+            superior.add(lblTotal, BorderLayout.CENTER);
+
+            panel.add(superior, BorderLayout.CENTER);
+            panel.add(lblDetalleTotal, BorderLayout.SOUTH);
+
+            JPanel contenedor = new JPanel(new BorderLayout());
+            contenedor.setOpaque(false);
+            contenedor.add(panel, BorderLayout.NORTH);
+
+            return contenedor;
+        }
+
+        private JPanel crearBotones() {
+
+            JPanel botones = new JPanel(new GridLayout(1, 6, 8, 0));
+            botones.setOpaque(false);
+
+            JButton btnNuevo = EstiloHotel.crearBoton("Nuevo", EstiloHotel.VERDE, Color.WHITE);
+            JButton btnGuardar = EstiloHotel.crearBoton("Guardar", EstiloHotel.DORADO, Color.WHITE);
+            JButton btnEditar = EstiloHotel.crearBoton("Editar", EstiloHotel.CAFE, Color.WHITE);
+            JButton btnEliminar = EstiloHotel.crearBoton("Eliminar", EstiloHotel.ROJO, Color.WHITE);
+            JButton btnLimpiar = EstiloHotel.crearBotonBorde("Limpiar", EstiloHotel.BRONCE);
+            JButton btnCancelar = EstiloHotel.crearBotonBorde("Cancelar", EstiloHotel.ROJO);
+
+            btnNuevo.addActionListener(e -> prepararNueva());
+            btnGuardar.addActionListener(e -> guardarReservacion());
+            btnEditar.addActionListener(e -> editarReservacion());
+            btnEliminar.addActionListener(e -> eliminarReservacion());
+            btnLimpiar.addActionListener(e -> limpiarFormulario());
+            btnCancelar.addActionListener(e -> cancelarReservacion());
+
+            botones.add(btnNuevo);
+            botones.add(btnGuardar);
+            botones.add(btnEditar);
+            botones.add(btnEliminar);
+            botones.add(btnLimpiar);
+            botones.add(btnCancelar);
+
+            return botones;
+        }
+
+        private JPanel crearTarjetaTabla() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 14));
+
+            JPanel arriba = new JPanel(new BorderLayout(0, 12));
+            arriba.setOpaque(false);
+
+            arriba.add(EstiloHotel.crearEncabezado(
+                    "R E S E R V A C I O N E S",
+                    "Reservaciones registradas",
+                    "Seleccione una fila para cargarla en el formulario."),
+                    BorderLayout.NORTH);
+
+            arriba.add(crearBarraFiltros(), BorderLayout.SOUTH);
+
+            tarjeta.add(arriba, BorderLayout.NORTH);
+
+            EstiloHotel.configurarTabla(tabla);
+            tabla.setRowSorter(ordenador);
+            ajustarAnchoColumnas();
+
+            tarjeta.add(EstiloHotel.crearScrollTabla(tabla), BorderLayout.CENTER);
+
+            tabla.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+
+                    if (e.getValueIsAdjusting()) {
+                        return;
+                    }
+
+                    cargarReservacionSeleccionada();
+                }
+            });
+
+            return tarjeta;
+        }
+
+        private void ajustarAnchoColumnas() {
+
+            int[] anchos = {36, 150, 52, 80, 84, 84, 56, 48, 78, 80};
+
+            for (int i = 0; i < anchos.length; i++) {
+                tabla.getColumnModel().getColumn(i).setPreferredWidth(anchos[i]);
+            }
+        }
+
+        private JPanel crearBarraFiltros() {
+
+            JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            barra.setOpaque(false);
+
+            JLabel lblBuscar = new JLabel("Buscar:");
+            lblBuscar.setFont(EstiloHotel.ETIQUETA);
+            lblBuscar.setForeground(EstiloHotel.CAFE);
+
+            txtBuscar.setPreferredSize(new Dimension(190, 32));
+            cmbFiltroEstado.setPreferredSize(new Dimension(140, 32));
+            cmbFiltroTipo.setPreferredSize(new Dimension(140, 32));
+
+            JLabel lblEstado = new JLabel("Estado:");
+            lblEstado.setFont(EstiloHotel.ETIQUETA);
+            lblEstado.setForeground(EstiloHotel.CAFE);
+
+            JLabel lblTipo = new JLabel("Tipo:");
+            lblTipo.setFont(EstiloHotel.ETIQUETA);
+            lblTipo.setForeground(EstiloHotel.CAFE);
+
+            barra.add(lblBuscar);
+            barra.add(txtBuscar);
+            barra.add(lblEstado);
+            barra.add(cmbFiltroEstado);
+            barra.add(lblTipo);
+            barra.add(cmbFiltroTipo);
+
+            txtBuscar.getDocument().addDocumentListener(new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    aplicarFiltros();
+                }
+
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    aplicarFiltros();
+                }
+
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    aplicarFiltros();
+                }
+            });
+
+            ItemListener filtro = new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        aplicarFiltros();
+                    }
+                }
+            };
+
+            cmbFiltroEstado.addItemListener(filtro);
+            cmbFiltroTipo.addItemListener(filtro);
+
+            return barra;
+        }
+
+        private void aplicarFiltros() {
+
+            List<RowFilter<Object, Object>> filtros = new ArrayList<>();
+
+            String texto = txtBuscar.getText().trim();
+
+            if (!texto.isEmpty()) {
+                filtros.add(RowFilter.regexFilter("(?i)" + Pattern.quote(texto)));
+            }
+
+            if (cmbFiltroEstado.getSelectedIndex() > 0) {
+                filtros.add(RowFilter.regexFilter(
+                        "^" + Pattern.quote((String) cmbFiltroEstado.getSelectedItem()) + "$",
+                        COLUMNA_ESTADO));
+            }
+
+            if (cmbFiltroTipo.getSelectedIndex() > 0) {
+                filtros.add(RowFilter.regexFilter(
+                        "^" + Pattern.quote((String) cmbFiltroTipo.getSelectedItem()) + "$",
+                        COLUMNA_TIPO));
+            }
+
+            if (filtros.isEmpty()) {
+                ordenador.setRowFilter(null);
+            } else {
+                ordenador.setRowFilter(RowFilter.andFilter(filtros));
+            }
+        }
+
+        private void refrescarTabla() {
+
+            modeloTabla.setRowCount(0);
+
+            for (Reservacion reservacion : DatosHotel.getReservaciones()) {
+                modeloTabla.addRow(new Object[]{
+                        reservacion.getNumero(),
+                        reservacion.getHuesped().getNombreCompleto(),
+                        reservacion.getHabitacion().getNumero(),
+                        reservacion.getHabitacion().getTipo(),
+                        reservacion.getFechaEntradaTexto(),
+                        reservacion.getFechaSalidaTexto(),
+                        reservacion.getNoches(),
+                        reservacion.getTotalPersonas(),
+                        reservacion.getEstado(),
+                        String.format("$%,.2f", reservacion.getTotal())
+                });
+            }
+
+            aplicarFiltros();
+        }
+
+        public void actualizarListas() {
+
+            cargandoDatos = true;
+
+            Huesped huespedActual = (Huesped) cmbHuesped.getSelectedItem();
+
+            cmbHuesped.removeAllItems();
+
+            for (Huesped huesped : DatosHotel.getHuespedes()) {
+                cmbHuesped.addItem(huesped);
+            }
+
+            if (huespedActual != null) {
+                cmbHuesped.setSelectedItem(huespedActual);
+            }
+
+            cargandoDatos = false;
+
+            recargarHabitaciones();
+            refrescarTabla();
+        }
+
+        private void recargarHabitaciones() {
+
+            cargandoDatos = true;
+
+            Habitacion habitacionActual = (Habitacion) cmbHabitacion.getSelectedItem();
+
+            Habitacion habitacionDeLaReserva = reservacionSeleccionada == null
+                    ? null
+                    : reservacionSeleccionada.getHabitacion();
+
+            cmbHabitacion.removeAllItems();
+
+            List<Habitacion> disponibles = DatosHotel.getHabitacionesDisponibles(
+                    (String) cmbTipo.getSelectedItem(), habitacionDeLaReserva);
+
+            for (Habitacion habitacion : disponibles) {
+                cmbHabitacion.addItem(habitacion);
+            }
+
+            if (habitacionActual != null && disponibles.contains(habitacionActual)) {
+                cmbHabitacion.setSelectedItem(habitacionActual);
+            }
+
+            cargandoDatos = false;
+
+            actualizarTotal();
+        }
+
+        private void actualizarTotal() {
+
+            Habitacion habitacion = (Habitacion) cmbHabitacion.getSelectedItem();
+            int noches = calcularNoches();
+
+            double total = Reservacion.calcularTotal(
+                    habitacion,
+                    noches,
+                    (Integer) spCantidadHabitaciones.getValue(),
+                    chkDesayuno.isSelected(),
+                    chkParqueo.isSelected(),
+                    chkSpa.isSelected());
+
+            lblTotal.setText(String.format("$%,.2f", total));
+
+            if (habitacion == null) {
+                lblDetalleTotal.setText("No hay habitaciones disponibles de ese tipo");
+            } else if (noches <= 0) {
+                lblDetalleTotal.setText("La salida debe ser despues de la entrada");
+            } else {
+                lblDetalleTotal.setText(noches + " noche(s) x $"
+                        + String.format("%.2f", habitacion.getPrecioPorNoche())
+                        + " x " + spCantidadHabitaciones.getValue() + " habitacion(es)");
+            }
+        }
+
+        private int calcularNoches() {
+            return (int) ChronoUnit.DAYS.between(getFechaEntrada(), getFechaSalida());
+        }
+
+        private void prepararNueva() {
+
+            limpiarFormulario();
+
+            JOptionPane.showMessageDialog(this,
+                    "Puede registrar una reservacion nueva.",
+                    "Nueva reservacion",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void guardarReservacion() {
+
+            if (!validarFormulario(null)) {
+                return;
+            }
+
+            Reservacion reservacion = new Reservacion(
+                    DatosHotel.tomarNumeroReservacion(),
+                    (Huesped) cmbHuesped.getSelectedItem(),
+                    (Habitacion) cmbHabitacion.getSelectedItem(),
+                    getFechaEntrada(),
+                    getFechaSalida(),
+                    (Integer) spAdultos.getValue(),
+                    (Integer) spNinos.getValue(),
+                    (Integer) spCantidadHabitaciones.getValue(),
+                    getEstadoSeleccionado(),
+                    chkDesayuno.isSelected(),
+                    chkParqueo.isSelected(),
+                    chkSpa.isSelected());
+
+            DatosHotel.agregarReservacion(reservacion);
+
+            actualizarEstadoHabitacion(reservacion, null);
+
+            limpiarFormulario();
+            actualizarListas();
+
+            JOptionPane.showMessageDialog(this,
+                    "Reservacion #" + reservacion.getNumero() + " guardada correctamente.\n"
+                            + "Total: " + String.format("$%,.2f", reservacion.getTotal()),
+                    "Guardar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void editarReservacion() {
+
+            if (reservacionSeleccionada == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla la reservacion que desea editar.",
+                        "Editar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (!validarFormulario(reservacionSeleccionada)) {
+                return;
+            }
+
+            Habitacion habitacionAnterior = reservacionSeleccionada.getHabitacion();
+
+            reservacionSeleccionada.setHuesped((Huesped) cmbHuesped.getSelectedItem());
+            reservacionSeleccionada.setHabitacion((Habitacion) cmbHabitacion.getSelectedItem());
+            reservacionSeleccionada.setFechaEntrada(getFechaEntrada());
+            reservacionSeleccionada.setFechaSalida(getFechaSalida());
+            reservacionSeleccionada.setAdultos((Integer) spAdultos.getValue());
+            reservacionSeleccionada.setNinos((Integer) spNinos.getValue());
+            reservacionSeleccionada.setCantidadHabitaciones(
+                    (Integer) spCantidadHabitaciones.getValue());
+            reservacionSeleccionada.setEstado(getEstadoSeleccionado());
+            reservacionSeleccionada.setDesayuno(chkDesayuno.isSelected());
+            reservacionSeleccionada.setParqueo(chkParqueo.isSelected());
+            reservacionSeleccionada.setSpa(chkSpa.isSelected());
+
+            actualizarEstadoHabitacion(reservacionSeleccionada, habitacionAnterior);
+
+            limpiarFormulario();
+            actualizarListas();
+
+            JOptionPane.showMessageDialog(this,
+                    "Reservacion actualizada correctamente.",
+                    "Editar",
+                    JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        private void eliminarReservacion() {
+
+            if (reservacionSeleccionada == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla la reservacion que desea eliminar.",
+                        "Eliminar",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "Desea eliminar la reservacion #" + reservacionSeleccionada.getNumero() + "?",
+                    "Confirmar eliminacion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+
+            if (respuesta == JOptionPane.YES_OPTION) {
+
+                liberarHabitacion(reservacionSeleccionada.getHabitacion());
+
+                DatosHotel.eliminarReservacion(reservacionSeleccionada);
+
+                limpiarFormulario();
+                actualizarListas();
+
+                JOptionPane.showMessageDialog(this,
+                        "Reservacion eliminada correctamente.",
+                        "Eliminar",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        private void cancelarReservacion() {
+
+            if (reservacionSeleccionada == null) {
+                JOptionPane.showMessageDialog(this,
+                        "Seleccione en la tabla la reservacion que desea cancelar.",
+                        "Cancelar reservacion",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (Reservacion.CANCELADA.equals(reservacionSeleccionada.getEstado())) {
+                JOptionPane.showMessageDialog(this,
+                        "Esa reservacion ya estaba cancelada.",
+                        "Cancelar reservacion",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            int respuesta = JOptionPane.showConfirmDialog(this,
+                    "Desea cancelar la reservacion #" + reservacionSeleccionada.getNumero() + "?\n"
+                            + "La habitacion " + reservacionSeleccionada.getHabitacion().getNumero()
+                            + " quedara disponible.",
+                    "Confirmar cancelacion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+
+            if (respuesta == JOptionPane.YES_OPTION) {
+
+                reservacionSeleccionada.setEstado(Reservacion.CANCELADA);
+                liberarHabitacion(reservacionSeleccionada.getHabitacion());
+
+                limpiarFormulario();
+                actualizarListas();
+
+                JOptionPane.showMessageDialog(this,
+                        "Reservacion cancelada.",
+                        "Cancelar reservacion",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+
+        private void limpiarFormulario() {
+
+            reservacionSeleccionada = null;
+
+            cargandoDatos = true;
+
+            if (cmbHuesped.getItemCount() > 0) {
+                cmbHuesped.setSelectedIndex(0);
+            }
+
+            cmbTipo.setSelectedIndex(0);
+
+            spFechaEntrada.setValue(aDate(LocalDate.now()));
+            spFechaSalida.setValue(aDate(LocalDate.now().plusDays(1)));
+            spAdultos.setValue(1);
+            spNinos.setValue(0);
+            spCantidadHabitaciones.setValue(1);
+
+            rbActiva.setSelected(true);
+
+            chkDesayuno.setSelected(false);
+            chkParqueo.setSelected(false);
+            chkSpa.setSelected(false);
+
+            cargandoDatos = false;
+
+            tabla.clearSelection();
+            recargarHabitaciones();
+        }
+
+        private void cargarReservacionSeleccionada() {
+
+            int filaVista = tabla.getSelectedRow();
+
+            if (filaVista == -1) {
+                return;
+            }
+
+            int filaModelo = tabla.convertRowIndexToModel(filaVista);
+
+            reservacionSeleccionada = DatosHotel.getReservaciones().get(filaModelo);
+
+            cargandoDatos = true;
+
+            cmbHuesped.setSelectedItem(reservacionSeleccionada.getHuesped());
+            cmbTipo.setSelectedItem(reservacionSeleccionada.getHabitacion().getTipo());
+
+            spFechaEntrada.setValue(aDate(reservacionSeleccionada.getFechaEntrada()));
+            spFechaSalida.setValue(aDate(reservacionSeleccionada.getFechaSalida()));
+            spAdultos.setValue(reservacionSeleccionada.getAdultos());
+            spNinos.setValue(reservacionSeleccionada.getNinos());
+            spCantidadHabitaciones.setValue(reservacionSeleccionada.getCantidadHabitaciones());
+
+            chkDesayuno.setSelected(reservacionSeleccionada.tieneDesayuno());
+            chkParqueo.setSelected(reservacionSeleccionada.tieneParqueo());
+            chkSpa.setSelected(reservacionSeleccionada.tieneSpa());
+
+            if (Reservacion.ACTIVA.equals(reservacionSeleccionada.getEstado())) {
+                rbActiva.setSelected(true);
+            } else if (Reservacion.CANCELADA.equals(reservacionSeleccionada.getEstado())) {
+                rbCancelada.setSelected(true);
+            } else {
+                rbFinalizada.setSelected(true);
+            }
+
+            cargandoDatos = false;
+
+            recargarHabitaciones();
+            cmbHabitacion.setSelectedItem(reservacionSeleccionada.getHabitacion());
+        }
+
+        private boolean validarFormulario(Reservacion excepcion) {
+
+            Huesped huesped = (Huesped) cmbHuesped.getSelectedItem();
+            Habitacion habitacion = (Habitacion) cmbHabitacion.getSelectedItem();
+
+            if (huesped == null) {
+                mostrarAdvertencia("Primero debe registrar un huesped en el modulo de Huespedes.");
+                return false;
+            }
+
+            if (habitacion == null) {
+                mostrarAdvertencia("No hay habitaciones disponibles de ese tipo.\n"
+                        + "Elija otro tipo de habitacion.");
+                return false;
+            }
+
+            if (calcularNoches() <= 0) {
+                mostrarAdvertencia("La fecha de salida debe ser posterior a la fecha de entrada.");
+                return false;
+            }
+
+            boolean esLaMismaDeAntes = excepcion != null && excepcion.getHabitacion() == habitacion;
+
+            if (!habitacion.estaDisponible() && !esLaMismaDeAntes) {
+                mostrarAdvertencia("La habitacion " + habitacion.getNumero()
+                        + " esta en estado " + habitacion.getEstado() + ".\n"
+                        + "Seleccione una habitacion disponible.");
+                return false;
+            }
+
+            int personas = (Integer) spAdultos.getValue() + (Integer) spNinos.getValue();
+            int capacidadTotal = habitacion.getCapacidad()
+                    * (Integer) spCantidadHabitaciones.getValue();
+
+            if (personas > capacidadTotal) {
+                mostrarAdvertencia("La habitacion " + habitacion.getNumero() + " admite hasta "
+                        + capacidadTotal + " persona(s) y usted registro " + personas + ".\n"
+                        + "Aumente la cantidad de habitaciones o elija una mas grande.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private void mostrarAdvertencia(String mensaje) {
+            JOptionPane.showMessageDialog(this, mensaje, "Validacion", JOptionPane.WARNING_MESSAGE);
+        }
+
+        private void actualizarEstadoHabitacion(Reservacion reservacion, Habitacion habitacionAnterior) {
+
+            if (habitacionAnterior != null && habitacionAnterior != reservacion.getHabitacion()) {
+                liberarHabitacion(habitacionAnterior);
+            }
+
+            Habitacion habitacion = reservacion.getHabitacion();
+
+            if (reservacion.estaActiva()) {
+                habitacion.setEstado(Habitacion.OCUPADA);
+            } else {
+                liberarHabitacion(habitacion);
+            }
+        }
+
+        private void liberarHabitacion(Habitacion habitacion) {
+
+            if (habitacion != null && Habitacion.OCUPADA.equals(habitacion.getEstado())) {
+                habitacion.setEstado(Habitacion.DISPONIBLE);
+            }
+        }
+
+        private String getEstadoSeleccionado() {
+
+            if (rbCancelada.isSelected()) {
+                return Reservacion.CANCELADA;
+            }
+
+            if (rbFinalizada.isSelected()) {
+                return Reservacion.FINALIZADA;
+            }
+
+            return Reservacion.ACTIVA;
+        }
+
+        private LocalDate getFechaEntrada() {
+            return aLocalDate((Date) spFechaEntrada.getValue());
+        }
+
+        private LocalDate getFechaSalida() {
+            return aLocalDate((Date) spFechaSalida.getValue());
+        }
+
+        private static LocalDate aLocalDate(Date fecha) {
+            return fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        }
+
+        private static Date aDate(LocalDate fecha) {
+            return Date.from(fecha.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        }
+    }
+
+    private static class PanelReportes extends JPanel {
+
+        private final JLabel lblTotalHabitaciones = crearNumero();
+        private final JLabel lblDisponibles = crearNumero();
+        private final JLabel lblOcupadas = crearNumero();
+        private final JLabel lblMantenimiento = crearNumero();
+        private final JLabel lblOcupacion = crearNumero();
+        private final JLabel lblHuespedes = crearNumero();
+        private final JLabel lblActivas = crearNumero();
+        private final JLabel lblIngresos = crearNumero();
+
+        private final JLabel lblDetalleReservaciones = new JLabel();
+
+        private final JTextArea txtNotas = new JTextArea();
+
+        public PanelReportes() {
+
+            setLayout(new BorderLayout(0, 18));
+            setBackground(EstiloHotel.FONDO);
+            setBorder(new EmptyBorder(20, 24, 20, 24));
+
+            add(crearTarjetaResumen(), BorderLayout.CENTER);
+            add(crearTarjetaNotas(), BorderLayout.SOUTH);
+
+            actualizarReporte();
+        }
+
+        private JPanel crearTarjetaResumen() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 18));
+
+            JPanel arriba = new JPanel(new BorderLayout(20, 0));
+            arriba.setOpaque(false);
+
+            arriba.add(EstiloHotel.crearEncabezadoCompacto(
+                    "R E P O R T E S",
+                    "Ocupacion e ingresos"), BorderLayout.CENTER);
+
+            JButton btnActualizar = EstiloHotel.crearBotonBorde("Actualizar", EstiloHotel.BRONCE);
+            btnActualizar.addActionListener(e -> {
+                actualizarReporte();
+                JOptionPane.showMessageDialog(this,
+                        "Reporte actualizado.",
+                        "Reportes",
+                        JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            JPanel contenedorBoton = new JPanel(new BorderLayout());
+            contenedorBoton.setOpaque(false);
+            contenedorBoton.add(btnActualizar, BorderLayout.NORTH);
+
+            arriba.add(contenedorBoton, BorderLayout.EAST);
+
+            tarjeta.add(arriba, BorderLayout.NORTH);
+
+            JPanel cuadros = new JPanel(new GridLayout(2, 4, 14, 12));
+            cuadros.setOpaque(false);
+
+            cuadros.add(crearCuadro("Habitaciones", lblTotalHabitaciones));
+            cuadros.add(crearCuadro("Disponibles", lblDisponibles));
+            cuadros.add(crearCuadro("Ocupadas", lblOcupadas));
+            cuadros.add(crearCuadro("En mantenimiento", lblMantenimiento));
+            cuadros.add(crearCuadro("Ocupacion", lblOcupacion));
+            cuadros.add(crearCuadro("Huespedes", lblHuespedes));
+            cuadros.add(crearCuadro("Reservaciones activas", lblActivas));
+            cuadros.add(crearCuadro("Ingresos", lblIngresos));
+
+            JPanel centro = new JPanel(new BorderLayout(0, 14));
+            centro.setOpaque(false);
+            centro.add(cuadros, BorderLayout.CENTER);
+
+            lblDetalleReservaciones.setFont(EstiloHotel.PEQUENA);
+            lblDetalleReservaciones.setForeground(EstiloHotel.TEXTO_SUAVE);
+
+            centro.add(lblDetalleReservaciones, BorderLayout.SOUTH);
+
+            tarjeta.add(centro, BorderLayout.CENTER);
+
+            return tarjeta;
+        }
+
+        private JPanel crearCuadro(String titulo, JLabel numero) {
+
+            PanelRedondeado cuadro = new PanelRedondeado(
+                    new BorderLayout(0, 2), EstiloHotel.BEIGE_CLARO, EstiloHotel.BORDE, 10);
+            cuadro.setBorder(new EmptyBorder(10, 16, 10, 16));
+
+            JLabel lblTitulo = new JLabel(titulo.toUpperCase());
+            lblTitulo.setFont(EstiloHotel.MINI);
+            lblTitulo.setForeground(EstiloHotel.TEXTO_SUAVE);
+
+            cuadro.add(lblTitulo, BorderLayout.NORTH);
+            cuadro.add(numero, BorderLayout.CENTER);
+
+            return cuadro;
+        }
+
+        private static JLabel crearNumero() {
+
+            JLabel numero = new JLabel("0");
+            numero.setFont(new Font("Georgia", Font.BOLD, 22));
+            numero.setForeground(EstiloHotel.CAFE);
+
+            return numero;
+        }
+
+        private JPanel crearTarjetaNotas() {
+
+            PanelRedondeado tarjeta = EstiloHotel.crearTarjeta(new BorderLayout(0, 12));
+            tarjeta.setPreferredSize(new Dimension(0, 205));
+
+            tarjeta.add(EstiloHotel.crearEncabezadoCompacto(
+                    "R E C E P C I O N",
+                    "Notas rapidas"), BorderLayout.NORTH);
+
+            txtNotas.setText("Recordar confirmar los transportes al aeropuerto.\n"
+                    + "Revisar el estado de la habitacion 202 (mantenimiento).");
+
+            tarjeta.add(EstiloHotel.crearAreaTexto(txtNotas, 3), BorderLayout.CENTER);
+
+            JButton btnGuardarNota = EstiloHotel.crearBoton("Guardar nota",
+                    EstiloHotel.DORADO, Color.WHITE);
+
+            btnGuardarNota.addActionListener(e -> JOptionPane.showMessageDialog(this,
+                    "Nota guardada correctamente.",
+                    "Notas rapidas",
+                    JOptionPane.INFORMATION_MESSAGE));
+
+            JPanel pie = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            pie.setOpaque(false);
+            pie.add(btnGuardarNota);
+
+            tarjeta.add(pie, BorderLayout.SOUTH);
+
+            return tarjeta;
+        }
+
+        public void actualizarReporte() {
+
+            int totalHabitaciones = DatosHotel.getHabitaciones().size();
+            int disponibles = DatosHotel.contarHabitaciones(Habitacion.DISPONIBLE);
+            int ocupadas = DatosHotel.contarHabitaciones(Habitacion.OCUPADA);
+            int mantenimiento = DatosHotel.contarHabitaciones(Habitacion.MANTENIMIENTO);
+
+            lblTotalHabitaciones.setText(String.valueOf(totalHabitaciones));
+            lblDisponibles.setText(String.valueOf(disponibles));
+            lblOcupadas.setText(String.valueOf(ocupadas));
+            lblMantenimiento.setText(String.valueOf(mantenimiento));
+
+            int porcentaje = totalHabitaciones == 0
+                    ? 0
+                    : (int) Math.round(ocupadas * 100.0 / totalHabitaciones);
+
+            lblOcupacion.setText(porcentaje + "%");
+
+            lblHuespedes.setText(String.valueOf(DatosHotel.getHuespedes().size()));
+
+            int activas = DatosHotel.contarReservaciones(Reservacion.ACTIVA);
+            int canceladas = DatosHotel.contarReservaciones(Reservacion.CANCELADA);
+            int finalizadas = DatosHotel.contarReservaciones(Reservacion.FINALIZADA);
+
+            lblActivas.setText(String.valueOf(activas));
+            lblIngresos.setText(String.format("$%,.0f", DatosHotel.calcularIngresos()));
+
+            lblDetalleReservaciones.setText("Reservaciones:  " + activas + " activas  ·  "
+                    + canceladas + " canceladas  ·  " + finalizadas + " finalizadas  ·  "
+                    + DatosHotel.getReservaciones().size() + " en total."
+                    + "     Los ingresos no incluyen las reservaciones canceladas.");
         }
     }
 }
